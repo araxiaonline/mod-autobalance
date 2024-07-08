@@ -1016,7 +1016,8 @@ void SetGroupDifficulty(Player* player, uint8 difficulty) {
 uint8 GetGroupDifficulty(const Group* group) {
     QueryResult result = CharacterDatabase.Query("SELECT difficulty FROM groups WHERE guid = {}", group->GetGUID().GetEntry());
     if (!result) {
-        return;
+        LOG_ERROR("module.AutoBalance", "GetGroupDifficulty(): No difficulty found for group {}.", group->GetGUID().GetEntry());
+        return group->GetDifficulty(false);
     }
 
     return result->Fetch()[0].Get<uint8>();
