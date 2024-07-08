@@ -46,6 +46,7 @@
 #include "Log.h"
 #include <chrono>
 
+
 #if AC_COMPILER == AC_COMPILER_GNU
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -1000,6 +1001,27 @@ int GetForcedNumPlayers(int creatureId)
     return forcedCreatureIds[creatureId];
 }
 
+void SetGroupDifficulty(Player* player, uint8 difficulty) {
+    if(!player || !player->GetGroup())
+        return;
+
+    if(difficulty > 4 || difficulty < 0)
+        return;
+
+
+    Group* group = player->GetGroup();
+    CharacterDatabase.DirectExecute("UPDATE groups SET difficulty = {} WHERE guid = {}", difficulty, group->GetGUID().GetEntry());
+}
+
+uint8 GetGroupDifficulty(const Group* group) {
+    QueryResult result = CharacterDatabase.Query("SELECT difficulty FROM groups WHERE guid = {}", group->GetGUID().GetEntry());
+    if (!result) {
+        return;
+    }
+
+    return result->Fetch()[0].Get<uint8>();
+}
+
 class AutoBalance_WorldScript : public WorldScript
 {
     public:
@@ -1698,7 +1720,6 @@ class AutoBalance_UnitScript : public UnitScript
         }
     }
 };
-
 
 class AutoBalance_AllMapScript : public AllMapScript
 {
@@ -3089,77 +3110,21 @@ public:
 
     static bool HandleABMythicCommand(ChatHandler* handler, const char* /*args*/)
     {
-        Player* player = handler->GetPlayer();
-        if(!player) {
-            return false;
-        }
-
-        Group* group = player->GetGroup();
-        if (!group)
-        {
-            handler->PSendSysMessage("autobalance: You are not in a group.");
-            return false;
-        }
-
-        if (group->GetLeader() != handler->GetSession()->GetPlayer())
-        {
-            handler->PSendSysMessage("autobalance: You are not the group leader.");
-            return false;
-        }
-
-        CharacterDatabase.DirectExecute("UPDATE groups SET difficulty = 2 WHERE guid = {}", group->GetGUID().GetEntry());
+        SetGroupDifficulty(handler->GetPlayer(), 2);
         handler->PSendSysMessage("autobalance: group difficulty set to Mythic. Rewards improvements x1. level(81-83) recommended.");
-
         return true;
     }
 
     static bool HandleABLegendaryCommand(ChatHandler* handler, const char* /*args*/)
     {
-        Player* player = handler->GetPlayer();
-        if(!player) {
-            return false;
-        }
-
-        Group* group = player->GetGroup();
-        if (!group)
-        {
-            handler->PSendSysMessage("autobalance: You are not in a group.");
-            return false;
-        }
-
-        if (group->GetLeader() != handler->GetSession()->GetPlayer())
-        {
-            handler->PSendSysMessage("autobalance: You are not the group leader.");
-            return false;
-        }
-
-        CharacterDatabase.DirectExecute("UPDATE groups SET difficulty = 3 WHERE guid = {}", group->GetGUID().GetEntry());
+        SetGroupDifficulty(handler->GetPlayer(), 4);
         handler->PSendSysMessage("autobalance: group difficulty set to Mythic. Reward improvements x2 level(85) recommended.");
-
         return true;
     }
 
     static bool HandleABAscendantCommand(ChatHandler* handler, const char* /*args*/)
     {
-        Player* player = handler->GetPlayer();
-        if(!player) {
-            return false;
-        }
-
-        Group* group = player->GetGroup();
-        if (!group)
-        {
-            handler->PSendSysMessage("autobalance: You are not in a group.");
-            return false;
-        }
-
-        if (group->GetLeader() != handler->GetSession()->GetPlayer())
-        {
-            handler->PSendSysMessage("autobalance: You are not the group leader.");
-            return false;
-        }
-
-        CharacterDatabase.DirectExecute("UPDATE groups SET difficulty = 2 WHERE guid = {}", group->GetGUID().GetEntry());
+        SetGroupDifficulty(handler->GetPlayer(), 4);
         handler->PSendSysMessage("autobalance: group difficulty set to Ascendant. Reward improvements x3 leve(85) required.");
 
         return true;
@@ -3178,21 +3143,13 @@ public:
             return false;
         }
 
-        if (group->GetLeader() != handler->GetSession()->GetPlayer())
-        {
-            handler->PSendSysMessage("autobalance: You are not the group leader.");
-            return false;
-        }
-
-        QueryResult result = CharacterDatabase.Query("SELECT difficulty FROM groups WHERE guid = {}", group->GetGUID().GetEntry());
-        if (!result)
-        {
+        uint8 difficulty = 0;
+        difficulty = GetGroupDifficulty(group);
+        if(!difficulty) {
             handler->PSendSysMessage("autobalance: group difficulty not found.");
             return false;
         }
-
-        Field* fields = result->Fetch();
-        handler->PSendSysMessage("autobalance: group difficulty is set to %u.", fields[0].Get<uint8>());
+        handler->PSendSysMessage("autobalance: group difficulty is set to {}.", difficulty);
         return true;
     }
 };
@@ -3240,8 +3197,12 @@ public:
         }
     }
 
+    /**
+     * This is used to provide better rewards to players when they complete a dungeon.
+     * The rewards are scaled up versions of the original drop.
+     * @brief Called after a player has looted an item from a creature.
+    */
     void OnBeforeDropAddItem(Player const* player, Loot& loot, bool canRate, uint16 lootMode, LootStoreItem* LootStoreItem, LootStore const& store) override {
-        // just log out the item drops for now
 
         if(LootStoreItem->itemid == 0) {
             return;
@@ -3249,6 +3210,7 @@ public:
 
         ItemTemplate const* newItem = sObjectMgr->GetItemTemplate(LootStoreItem->itemid);
         Map* map = player->GetMap();
+        const Group* group = player->GetGroup();
 
         LOG_INFO("server", "> OnBeforeDropAddItem:              Current Loot Drop Item {}", newItem->Name1);
 
@@ -3275,7 +3237,7 @@ public:
         }
 
         // 3. What is the difficulty of the instances?  2 - Mythic 3 - Legendary 4 - Ascendant
-        switch(map->GetDifficulty()) {
+        switch(GetGroupDifficulty(group)) {
             case 2:
                 idStart = 20000000;
                 break;
@@ -3289,25 +3251,11 @@ public:
                 return;
         }
 
-        const Group* group = player->GetGroup();
         if (!group)
         {
-            ChatHandler(player->GetSession()).PSendSysMessage("autobalance: You are not in a group.");
+            ChatHandler(player->GetSession()).PSendSysMessage("autobalance: player {} is not in a group.", player->GetName());
             return;
         }
-
-        ChatHandler chandler = ChatHandler(player->GetSession());
-
-        QueryResult result = CharacterDatabase.Query("SELECT difficulty FROM groups WHERE guid = {}", group->GetGUID().GetEntry());
-        if (!result)
-        {
-            chandler.PSendSysMessage("autobalance: group difficulty not found.");
-            return;
-        }
-
-        Field* fields = result->Fetch();
-        chandler.PSendSysMessage("autobalance: group difficulty is set to %u.", fields[0].Get<uint8>());
-
 
         // ItemTemplate const* newItem = sObjectMgr->GetItemTemplate(200000000);
         // if(!newItem) {
@@ -3333,15 +3281,16 @@ public:
     AutoBalance_GroupScript() : GroupScript("AutoBalance_GroupScript") { }
 
     void OnCreate(Group* group, Player* leader) override {
-        if (!group)
+        if (!group) {
             return;
+        }
 
-        Player* leader = group->GetLeader();
-        if (!leader)
+        if(!leader) {
             return;
+        }
 
         // default difficulty is whatever the player currently has it set as
-        uint8 difficulty = leader->GetDifficulty();
+        uint8 difficulty = leader->GetDifficulty(false);
 
         CharacterDatabase.DirectExecute("INSERT INTO group_difficulty (group_id, difficulty) VALUES ({}, {}) ON DUPLICATE KEY UPDATE difficulty = {}",
             group->GetGUID().GetEntry(), difficulty, difficulty);
@@ -3353,7 +3302,7 @@ public:
 
         CharacterDatabase.DirectExecute("DELETE FROM group_difficulty WHERE group_id = {}", group->GetGUID().GetEntry());
     }
-}
+};
 
 void AddAutoBalanceScripts()
 {
