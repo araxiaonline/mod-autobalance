@@ -3141,14 +3141,14 @@ public:
         if (!group)
         {
             handler->PSendSysMessage("autobalance: You are not in a group.");
-            return false;
+            return TC_RUNED_AZURITE_ROD;
         }
 
         uint8 difficulty = 0;
         difficulty = GetGroupDifficulty(group);
         if(!difficulty) {
             handler->PSendSysMessage("autobalance: group difficulty not found.");
-            return false;
+            return true;
         }
         handler->PSendSysMessage("autobalance: group difficulty is set to {}.", difficulty);
         return true;
@@ -3294,14 +3294,15 @@ public:
         uint8 difficulty = leader->GetDifficulty(false);
 
         CharacterDatabase.DirectExecute("INSERT INTO group_difficulty (group_id, difficulty) VALUES ({}, {}) ON DUPLICATE KEY UPDATE difficulty = {}",
-            group->GetGUID().GetEntry(), difficulty, difficulty);
+            group->GetGUID().GetCounter(), difficulty, difficulty);
     }
 
     void OnDisband(Group* group) override {
-        if (!group)
+        if (!group) {
             return;
+        }
 
-        CharacterDatabase.DirectExecute("DELETE FROM group_difficulty WHERE group_id = {}", group->GetGUID().GetEntry());
+        CharacterDatabase.DirectExecute("DELETE FROM group_difficulty WHERE group_id = {}", group->GetGUID().GetCounter());
     }
 };
 
