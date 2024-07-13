@@ -166,6 +166,8 @@ public:
     bool isLevelScalingEnabled;
     int levelScalingSkipHigherLevels, levelScalingSkipLowerLevels;
     int levelScalingDynamicCeiling, levelScalingDynamicFloor;
+
+    int customDifficulty = 0;
 };
 
 class AutoBalanceStatModifiers : public DataMap::Base
@@ -210,6 +212,14 @@ public:
 enum ScalingMethod {
     AUTOBALANCE_SCALING_FIXED,
     AUTOBALANCE_SCALING_DYNAMIC
+};
+
+enum GroupDifficulty {
+    GROUP_DIFFICULTY_NORMAL    = 0,
+    GROUP_DIFFICULTY_HEROIC    = 1,
+    GROUP_DIFFICULTY_MYTHIC    = 2,
+    GROUP_DIFFICULTY_LEGENDARY = 3,
+    GROUP_DIFFICULTY_ASCENDANT = 4
 };
 
 // The map values correspond with the .AutoBalance.XX.Name entries in the configuration file.
@@ -605,6 +615,7 @@ void LoadMapSettings(Map* map)
     //
     // Level Scaling Skip Levels
     //
+
 
     // Load the global settings into the map
     mapABInfo->levelScalingSkipHigherLevels = LevelScalingSkipHigherLevels;
@@ -1002,24 +1013,21 @@ int GetForcedNumPlayers(int creatureId)
 }
 
 void SetGroupDifficulty(Player* player, uint8 difficulty) {
-    if(!player || !player->GetGroup())
-        return;
-
-    if(difficulty > 4 || difficulty < 0)
-        return;
-
 
     Group* group = player->GetGroup();
-    CharacterDatabase.DirectExecute("UPDATE groups SET difficulty = {} WHERE guid = {}", difficulty, group->GetGUID().GetEntry());
+    LOG_INFO("server", "Setting group difficulty to {} for group {}", difficulty, group->GetGUID().GetCounter());
+    CharacterDatabase.DirectExecute("UPDATE group_difficulty SET difficulty = {} WHERE guid = {}", difficulty, group->GetGUID().GetCounter());
 }
 
 uint8 GetGroupDifficulty(const Group* group) {
-    QueryResult result = CharacterDatabase.Query("SELECT difficulty FROM groups WHERE guid = {}", group->GetGUID().GetEntry());
-    if (!result) {
-        LOG_ERROR("module.AutoBalance", "GetGroupDifficulty(): No difficulty found for group {}.", group->GetGUID().GetEntry());
-        return group->GetDifficulty(false);
-    }
+    if(!group)
+        return 0;
 
+    LOG_INFO("server", "Getting group difficulty for group {}", group->GetGUID().GetCounter());
+    QueryResult result = CharacterDatabase.Query("SELECT difficulty FROM group_difficulty WHERE guid = {}", group->GetGUID().GetCounter());
+    if (!result) {
+        return 0;
+    }
     return result->Fetch()[0].Get<uint8>();
 }
 
@@ -1409,6 +1417,8 @@ class AutoBalance_WorldScript : public WorldScript
         LevelScalingDynamicLevelCeilingHeroicRaids = sConfigMgr->GetOption<uint8>("AutoBalance.LevelScaling.DynamicLevel.Ceiling.HeroicRaids", 3);
         LevelScalingDynamicLevelFloorHeroicRaids = sConfigMgr->GetOption<uint8>("AutoBalance.LevelScaling.DynamicLevel.Floor.HeroicRaids", 5);
 
+
+
         if (sConfigMgr->GetOption<float>("AutoBalance.LevelEndGameBoost", false, false))
             LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.LevelEndGameBoost` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
         LevelScalingEndGameBoost = sConfigMgr->GetOption<bool>("AutoBalance.LevelScaling.EndGameBoost", sConfigMgr->GetOption<bool>("AutoBalance.LevelEndGameBoost", 1, false), true);
@@ -1617,7 +1627,7 @@ class AutoBalance_UnitScript : public UnitScript
         }
     }
 
-    uint32 _Modifer_DealDamage(Unit* target, Unit* attacker, uint32 damage)
+    uint32 _Modifer_DealDamage(Unit* target, Unit* attacker, uint32 damage, bool isSpell = false)
     {
         // check that we're enabled globally, else return the original damage
         if (!EnableGlobal)
@@ -1646,6 +1656,12 @@ class AutoBalance_UnitScript : public UnitScript
 
         // get the current creature's damage multiplier
         float damageMultiplier = attacker->CustomData.GetDefault<AutoBalanceCreatureInfo>("AutoBalanceCreatureInfo")->DamageMultiplier;
+
+        // reduce spell damage by 25%
+        if (isSpell)
+        {
+            damage = damage * 0.75;
+        }
 
         // if it's the default of 1.0, return the original damage
         if (damageMultiplier == 1)
@@ -1763,6 +1779,13 @@ class AutoBalance_AllMapScript : public AllMapScript
 
             // get the map's info
             AutoBalanceMapInfo *mapABInfo=map->CustomData.GetDefault<AutoBalanceMapInfo>("AutoBalanceMapInfo");
+
+            Group* group = player->GetGroup();
+            if (group)
+            {
+                // if the player is in a group, set the player count to the group size
+                mapABInfo->customDifficulty = GetGroupDifficulty(group);
+            }
 
             // recalculate the zone's level stats
             mapABInfo->highestCreatureLevel = 0;
@@ -2187,6 +2210,11 @@ public:
             {
                 selectedLevel = mapABInfo->highestPlayerLevel;
                 LOG_DEBUG("module.AutoBalance", "AutoBalance_AllCreatureScript::ModifyCreatureAttributes: Creature {} ({}) scaled to {} via fixed scaling.", creature->GetName(), creatureABInfo->UnmodifiedLevel, selectedLevel);
+            }
+
+            if (mapABInfo->customDifficulty == 2)
+            {
+                selectedLevel = 83;
             }
 
             creatureABInfo->selectedLevel = selectedLevel;
@@ -3111,21 +3139,21 @@ public:
 
     static bool HandleABMythicCommand(ChatHandler* handler, const char* /*args*/)
     {
-        SetGroupDifficulty(handler->GetPlayer(), 2);
+        SetGroupDifficulty(handler->GetPlayer(), GROUP_DIFFICULTY_MYTHIC);
         handler->PSendSysMessage("autobalance: group difficulty set to Mythic. Rewards improvements x1. level(81-83) recommended.");
         return true;
     }
 
     static bool HandleABLegendaryCommand(ChatHandler* handler, const char* /*args*/)
     {
-        SetGroupDifficulty(handler->GetPlayer(), 4);
+        SetGroupDifficulty(handler->GetPlayer(), GROUP_DIFFICULTY_LEGENDARY);
         handler->PSendSysMessage("autobalance: group difficulty set to Mythic. Reward improvements x2 level(85) recommended.");
         return true;
     }
 
     static bool HandleABAscendantCommand(ChatHandler* handler, const char* /*args*/)
     {
-        SetGroupDifficulty(handler->GetPlayer(), 4);
+        SetGroupDifficulty(handler->GetPlayer(), GROUP_DIFFICULTY_ASCENDANT);
         handler->PSendSysMessage("autobalance: group difficulty set to Ascendant. Reward improvements x3 leve(85) required.");
 
         return true;
@@ -3133,24 +3161,40 @@ public:
 
     static bool HandleABGetDifficultyCommand(ChatHandler* handler, const char*) {
         Player* player = handler->GetPlayer();
-        if(!player) {
-            return false;
-        }
-
         Group* group = player->GetGroup();
         if (!group)
         {
             handler->PSendSysMessage("autobalance: You are not in a group.");
-            return TC_RUNED_AZURITE_ROD;
+            return true;
         }
 
         uint8 difficulty = 0;
         difficulty = GetGroupDifficulty(group);
-        if(!difficulty) {
-            handler->PSendSysMessage("autobalance: group difficulty not found.");
-            return true;
+
+        char* difficultyStr;
+        switch (difficulty)
+        {
+            case GROUP_DIFFICULTY_NORMAL:
+                difficultyStr = "Normal";
+                break;
+            case GROUP_DIFFICULTY_HEROIC:
+                difficultyStr = "Heroic";
+                break;
+            case GROUP_DIFFICULTY_MYTHIC:
+                difficultyStr = "Mythic";
+                break;
+            case GROUP_DIFFICULTY_LEGENDARY:
+                difficultyStr = "Legendary";
+                break;
+            case GROUP_DIFFICULTY_ASCENDANT:
+                difficultyStr = "Ascendant";
+                break;
+
+            default:
+                break;
         }
-        handler->PSendSysMessage("autobalance: group difficulty is set to {}.", difficulty);
+
+        handler->PSendSysMessage("autobalance: group difficulty is set to %u (%s)", difficulty, difficultyStr);
         return true;
     }
 };
@@ -3222,18 +3266,17 @@ public:
 
         // 1. Is the instance scaled up to max level or beyond?
         AutoBalanceMapInfo *mapABInfo = map->CustomData.GetDefault<AutoBalanceMapInfo>("AutoBalanceMapInfo");
-        uint8 creatureLevel = mapABInfo->highestCreatureLevel;
+        if (!mapABInfo->isLevelScalingEnabled || player->getLevel() < 80)
+        {
+            return;
+        }
 
         // The items are deterministic based ont the id just need to add the correct id starting point
         uint32 idStart = 0;
 
-        // 1. Is the instance scaled up to max level or beyond?
-        if(creatureLevel <= 80) {
-            return;
-        }
-
         // 2. Is the loot quality rare or higher?
         if (newItem->Quality < 3) {
+            LOG_INFO("server", "> OnBeforeDropAddItem:              Quality {}", newItem->Quality);
             return;
         }
 
@@ -3249,7 +3292,7 @@ public:
                 idStart = 22000000;
                 break;
             default:
-                return;
+                break;
         }
 
         if (!group)
@@ -3258,20 +3301,22 @@ public:
             return;
         }
 
-        // ItemTemplate const* newItem = sObjectMgr->GetItemTemplate(200000000);
-        // if(!newItem) {
-        //     LOG_INFO("server", "> OnBeforeDropAddItem:              New Loot Item not found");
-        // } else {
-        //     LOG_INFO("server", "> OnBeforeDropAddItem:  New ITEM        ItemName {} Quality {} ItemLevel {}", newItem->Name1, newItem->Quality, newItem->ItemLevel);
-        // }
+        if (GetGroupDifficulty(group) < 2)
+        {
+            ChatHandler(player->GetSession()).PSendSysMessage("autobalance: group difficulty is not set to Mythic, Legendary or Ascendant.");
+            return;
+        }
 
-        // for (LootItem& item : loot.items) {
-        //     LOG_INFO("server", "> OnBeforeDropAddItem:            Items {} {}", player->GetName(), item.itemid);
-        //     ItemTemplate const* itemProto = sObjectMgr->GetItemTemplate(item.itemid);
-        //     if (itemProto) {
-        //         LOG_INFO("server", "> OnBeforeDropAddItem:   OLD ITEM        ItemName {} Quality {} ItemLevel {}", itemProto->Name1, itemProto->Quality, itemProto->ItemLevel);
-        //     }
-        // }
+        LOG_INFO("server", "> OnBeforeDropAddItem:              Current Loot Drop Item {}", LootStoreItem->itemid);
+        int newItemId = LootStoreItem->itemid + idStart;
+        ItemTemplate const* lookupItem = sObjectMgr->GetItemTemplate(newItemId);
+        LOG_INFO("server", "> OnBeforeDropAddItem:              Looking up for {} {}", newItemId, lookupItem->Name1);
+        if(!lookupItem) {
+            LOG_INFO("server", "> OnBeforeDropAddItem:              New Loot Item not found");
+        } else {
+            LOG_INFO("server", "> OnBeforeDropAddItem:  New ITEM        ItemName {} Quality {} ItemLevel {}", lookupItem->Name1, lookupItem->Quality, lookupItem->ItemLevel);
+            LootStoreItem->itemid = newItemId;
+        }
     }
 };
 
@@ -3293,7 +3338,7 @@ public:
         // default difficulty is whatever the player currently has it set as
         uint8 difficulty = leader->GetDifficulty(false);
 
-        CharacterDatabase.DirectExecute("INSERT INTO group_difficulty (group_id, difficulty) VALUES ({}, {}) ON DUPLICATE KEY UPDATE difficulty = {}",
+        CharacterDatabase.DirectExecute("INSERT INTO group_difficulty (guid, difficulty) VALUES ({}, {}) ON DUPLICATE KEY UPDATE difficulty = {}",
             group->GetGUID().GetCounter(), difficulty, difficulty);
     }
 
@@ -3302,7 +3347,7 @@ public:
             return;
         }
 
-        CharacterDatabase.DirectExecute("DELETE FROM group_difficulty WHERE group_id = {}", group->GetGUID().GetCounter());
+        CharacterDatabase.DirectExecute("DELETE FROM group_difficulty WHERE guid = {}", group->GetGUID().GetCounter());
     }
 };
 
