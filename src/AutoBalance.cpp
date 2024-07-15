@@ -274,7 +274,7 @@ static float InflectionPointRaid25MHeroic, InflectionPointRaid25MHeroicCurveFloo
 static float InflectionPointRaid40M, InflectionPointRaid40MCurveFloor, InflectionPointRaid40MCurveCeiling, InflectionPointRaid40MBoss;
 
 // StatModifier*
-static float StatModifier_Global, StatModifier_Health, StatModifier_Mana, StatModifier_Armor, StatModifier_Damage, StatModifier_CCDuration;
+static float StatModifier_Global, StatModifier_Health, StatModifier_Mana, StatModifier_Armor, StatModifier_Damage, StatModifier_SpellDamage, StatModifier_DoTDamage, StatModifier_CCDuration;
 static float StatModifierHeroic_Global, StatModifierHeroic_Health, StatModifierHeroic_Mana, StatModifierHeroic_Armor, StatModifierHeroic_Damage, StatModifierHeroic_CCDuration;
 static float StatModifierRaid_Global, StatModifierRaid_Health, StatModifierRaid_Mana, StatModifierRaid_Armor, StatModifierRaid_Damage, StatModifierRaid_CCDuration;
 static float StatModifierRaidHeroic_Global, StatModifierRaidHeroic_Health, StatModifierRaidHeroic_Mana, StatModifierRaidHeroic_Armor, StatModifierRaidHeroic_Damage, StatModifierRaidHeroic_CCDuration;
@@ -1023,12 +1023,19 @@ uint8 GetGroupDifficulty(const Group* group) {
     if(!group)
         return 0;
 
-    LOG_INFO("server", "Getting group difficulty for group {}", group->GetGUID().GetCounter());
     QueryResult result = CharacterDatabase.Query("SELECT difficulty FROM group_difficulty WHERE guid = {}", group->GetGUID().GetCounter());
     if (!result) {
         return 0;
     }
-    return result->Fetch()[0].Get<uint8>();
+    Field* fields = result->Fetch();
+    if(!fields)
+    {
+        LOG_INFO("server", "No difficulty found for group {}", group->GetGUID().GetCounter());
+        return 0;
+    }
+
+
+    return fields[0].Get<uint8>();
 }
 
 class AutoBalance_WorldScript : public WorldScript
@@ -1217,6 +1224,8 @@ class AutoBalance_WorldScript : public WorldScript
         StatModifier_Mana =                         sConfigMgr->GetOption<float>("AutoBalance.StatModifier.Mana", sConfigMgr->GetOption<float>("AutoBalance.rate.mana", 1.0f, false), false); // `AutoBalance.rate.mana` for backwards compatibility
         StatModifier_Armor =                        sConfigMgr->GetOption<float>("AutoBalance.StatModifier.Armor", sConfigMgr->GetOption<float>("AutoBalance.rate.armor", 1.0f, false), false); // `AutoBalance.rate.armor` for backwards compatibility
         StatModifier_Damage =                       sConfigMgr->GetOption<float>("AutoBalance.StatModifier.Damage", sConfigMgr->GetOption<float>("AutoBalance.rate.damage", 1.0f, false), false); // `AutoBalance.rate.damage` for backwards compatibility
+        StatModifier_SpellDamage =                  sConfigMgr->GetOption<float>("AutoBalance.StatModifier.SpellDamage", 1.0f, false);
+        StatModifier_DoTDamage =                    sConfigMgr->GetOption<float>("AutoBalance.StatModifier.DoTDamage", 1.0f, false);
         StatModifier_CCDuration =                   sConfigMgr->GetOption<float>("AutoBalance.StatModifier.CCDuration", -1.0f, false);
 
         StatModifier_Boss_Global =                  sConfigMgr->GetOption<float>("AutoBalance.StatModifier.Boss.Global", sConfigMgr->GetOption<float>("AutoBalance.rate.global", 1.0f, false), false); // `AutoBalance.rate.global` for backwards compatibility
@@ -1594,17 +1603,87 @@ class AutoBalance_UnitScript : public UnitScript
 
     void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* /*spellInfo*/) override
     {
-        damage = _Modifer_DealDamage(target, attacker, damage);
+        uint32 newdamage = _Modifer_DealDamage(target, attacker, damage);
+
+        if(target->IsPlayer() && !attacker->IsPlayer())
+        {
+            Group* group = target->ToPlayer()->GetGroup();
+            if(group)
+            {
+                uint8 difficulty = GetGroupDifficulty(group);
+                if(difficulty == 2) {
+                    newdamage = newdamage * StatModifier_SpellDamage * 1.15;
+                }
+                else if(difficulty == 3) {
+                    newdamage = newdamage * StatModifier_SpellDamage * 1.25;
+                }
+                else if(difficulty == 4) {
+                    newdamage = newdamage * StatModifier_SpellDamage * 1.50;
+                }
+                else {
+                    newdamage = newdamage * StatModifier_SpellDamage;
+                }
+            }
+        }
+
+        damage = newdamage;
     }
 
     void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* /*spellInfo*/) override
     {
-        damage = _Modifer_DealDamage(target, attacker, damage);
+        uint32 newdamage = _Modifer_DealDamage(target, attacker, damage);
+
+        if(target->IsPlayer() && !attacker->IsPlayer())
+        {
+            Group* group = target->ToPlayer()->GetGroup();
+            if(group)
+            {
+                uint8 difficulty = GetGroupDifficulty(group);
+                if(difficulty == 2) {
+                    newdamage = newdamage * StatModifier_SpellDamage * 0.75;
+                }
+                else if(difficulty == 3) {
+                    newdamage = newdamage * StatModifier_SpellDamage * 1.0;
+                }
+                else if(difficulty == 4) {
+                    newdamage = newdamage * StatModifier_SpellDamage * 1.25;
+                }
+                else {
+                    newdamage = newdamage * StatModifier_SpellDamage;
+                }
+            }
+        }
+
+        damage = newdamage;
     }
 
     void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
     {
-        damage = _Modifer_DealDamage(target, attacker, damage);
+
+        uint32 newdamage = _Modifer_DealDamage(target, attacker, damage);
+
+        if(target->IsPlayer() && !attacker->IsPlayer())
+        {
+            Group* group = target->ToPlayer()->GetGroup();
+            if(group)
+            {
+                uint8 difficulty = GetGroupDifficulty(group);
+                if(difficulty == 2) {
+                    newdamage = newdamage * StatModifier_SpellDamage * 1.15;
+                }
+                else if(difficulty == 3) {
+                    newdamage = newdamage * StatModifier_SpellDamage * 1.25;
+                }
+                else if(difficulty == 4) {
+                    newdamage = newdamage * StatModifier_SpellDamage * 1.50;
+                }
+                else {
+                    newdamage = newdamage * StatModifier_SpellDamage;
+                }
+            }
+        }
+
+        damage = newdamage;
     }
 
     void ModifyHealReceived(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* /*spellInfo*/) override
@@ -1627,7 +1706,7 @@ class AutoBalance_UnitScript : public UnitScript
         }
     }
 
-    uint32 _Modifer_DealDamage(Unit* target, Unit* attacker, uint32 damage, bool isSpell = false)
+    uint32 _Modifer_DealDamage(Unit* target, Unit* attacker, uint32 damage)
     {
         // check that we're enabled globally, else return the original damage
         if (!EnableGlobal)
@@ -1656,12 +1735,6 @@ class AutoBalance_UnitScript : public UnitScript
 
         // get the current creature's damage multiplier
         float damageMultiplier = attacker->CustomData.GetDefault<AutoBalanceCreatureInfo>("AutoBalanceCreatureInfo")->DamageMultiplier;
-
-        // reduce spell damage by 25%
-        if (isSpell)
-        {
-            damage = damage * 0.75;
-        }
 
         // if it's the default of 1.0, return the original damage
         if (damageMultiplier == 1)
@@ -3254,10 +3327,13 @@ public:
         }
 
         ItemTemplate const* newItem = sObjectMgr->GetItemTemplate(LootStoreItem->itemid);
+        if (!newItem) {
+            LOG_INFO("server", "> OnBeforeDropAddItem: Item not found for itemid {}", LootStoreItem->itemid);
+            return;
+        }
+
         Map* map = player->GetMap();
         const Group* group = player->GetGroup();
-
-        LOG_INFO("server", "> OnBeforeDropAddItem:              Current Loot Drop Item {}", newItem->Name1);
 
         // 3 things things need to happen
         // 1. Is the instance scaled up to max level or beyond?
@@ -3266,7 +3342,7 @@ public:
 
         // 1. Is the instance scaled up to max level or beyond?
         AutoBalanceMapInfo *mapABInfo = map->CustomData.GetDefault<AutoBalanceMapInfo>("AutoBalanceMapInfo");
-        if (!mapABInfo->isLevelScalingEnabled || player->getLevel() < 80)
+        if (!mapABInfo || !mapABInfo->isLevelScalingEnabled || player->getLevel() < 80)
         {
             return;
         }
@@ -3276,12 +3352,20 @@ public:
 
         // 2. Is the loot quality rare or higher?
         if (newItem->Quality < 3) {
-            LOG_INFO("server", "> OnBeforeDropAddItem:              Quality {}", newItem->Quality);
+            LOG_INFO("server", "> OnBeforeDropAddItem:   Quality {}", newItem->Quality);
             return;
         }
 
+        if(!group)
+        {
+            LOG_INFO("server", "> OnBeforeDropAddItem:              Player {} is not in a group.", player->GetName());
+            return;
+        }
+
+        uint8 grpDifficulty = GetGroupDifficulty(group);
+
         // 3. What is the difficulty of the instances?  2 - Mythic 3 - Legendary 4 - Ascendant
-        switch(GetGroupDifficulty(group)) {
+        switch(grpDifficulty) {
             case 2:
                 idStart = 20000000;
                 break;
@@ -3303,20 +3387,36 @@ public:
 
         if (GetGroupDifficulty(group) < 2)
         {
-            ChatHandler(player->GetSession()).PSendSysMessage("autobalance: group difficulty is not set to Mythic, Legendary or Ascendant.");
+            LOG_INFO("server", "> OnBeforeDropAddItem: Group Difficulty {}", GetGroupDifficulty(group));
             return;
         }
 
-        LOG_INFO("server", "> OnBeforeDropAddItem:              Current Loot Drop Item {}", LootStoreItem->itemid);
+        // LOG_INFO("server", "> OnBeforeDropAddItem:              Current Loot Drop Item {}", LootStoreItem->itemid);
         int newItemId = LootStoreItem->itemid + idStart;
+
         ItemTemplate const* lookupItem = sObjectMgr->GetItemTemplate(newItemId);
-        LOG_INFO("server", "> OnBeforeDropAddItem:              Looking up for {} {}", newItemId, lookupItem->Name1);
+
         if(!lookupItem) {
             LOG_INFO("server", "> OnBeforeDropAddItem:              New Loot Item not found");
+            return;
         } else {
             LOG_INFO("server", "> OnBeforeDropAddItem:  New ITEM        ItemName {} Quality {} ItemLevel {}", lookupItem->Name1, lookupItem->Quality, lookupItem->ItemLevel);
             LootStoreItem->itemid = newItemId;
+
+            // Revalidate the LootStoreItem to ensure consistency
+            if (!LootStoreItem->IsValid(store, newItemId)) {
+                LOG_ERROR("server", "> OnBeforeDropAddItem: LootStoreItem is not valid after updating itemid to {}", newItemId);
+                return;
+            }
+
+            // Optionally log other properties for debugging
+            LOG_INFO("server", "> OnBeforeDropAddItem: Updated LootStoreItem properties - reference {}, mincount {}, maxcount {}",
+            LootStoreItem->reference, LootStoreItem->mincount, LootStoreItem->maxcount);
+
         }
+
+        LOG_INFO("server", "> OnBeforeDropAddItem: Final LootStoreItem->itemid {}", LootStoreItem->itemid);
+
     }
 };
 
