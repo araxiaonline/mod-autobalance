@@ -1640,13 +1640,13 @@ class AutoBalance_UnitScript : public UnitScript
             {
                 uint8 difficulty = GetGroupDifficulty(group);
                 if(difficulty == 2) {
-                    newdamage = newdamage * StatModifier_SpellDamage * 0.75;
+                    newdamage = newdamage * StatModifier_SpellDamage * 0.55;
                 }
                 else if(difficulty == 3) {
-                    newdamage = newdamage * StatModifier_SpellDamage * 1.0;
+                    newdamage = newdamage * StatModifier_SpellDamage * 0.75;
                 }
                 else if(difficulty == 4) {
-                    newdamage = newdamage * StatModifier_SpellDamage * 1.25;
+                    newdamage = newdamage * StatModifier_SpellDamage * 1.20;
                 }
                 else {
                     newdamage = newdamage * StatModifier_SpellDamage;
