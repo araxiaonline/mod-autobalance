@@ -235,6 +235,7 @@ static std::map<uint32, uint32> levelScalingDistanceCheckOverrides;
 // cheaphack for difficulty server-wide.
 // Another value TODO in player class for the party leader's value to determine dungeon difficulty.
 static int8 PlayerCountDifficultyOffset;
+static float MythicMultiplier, LegendaryMultiplier, AscendantMultiplier;
 static bool LevelScaling;
 static int8 LevelScalingSkipHigherLevels, LevelScalingSkipLowerLevels;
 static int8 LevelScalingDynamicLevelCeilingDungeons, LevelScalingDynamicLevelFloorDungeons, LevelScalingDynamicLevelCeilingRaids, LevelScalingDynamicLevelFloorRaids;
@@ -1392,6 +1393,11 @@ class AutoBalance_WorldScript : public WorldScript
         MinCCDurationModifier = sConfigMgr->GetOption<float>("AutoBalance.MinCCDurationModifier", 0.25f);
         MaxCCDurationModifier = sConfigMgr->GetOption<float>("AutoBalance.MaxCCDurationModifier", 1.0f);
 
+        // Advanced Difficulty Scaling
+        MythicMultiplier = sConfigMgr->GetOption<float>("AutoBalance.MythicMultiplier", 1.0f);
+        LegendaryMultiplier = sConfigMgr->GetOption<float>("AutoBalance.LegendaryMultiplier", 1.2f);
+        AscendantMultiplier = sConfigMgr->GetOption<float>("AutoBalance.AscendantMultiplier", 1.55f);
+
         // LevelScaling.*
         LevelScaling = sConfigMgr->GetOption<bool>("AutoBalance.LevelScaling", true);
 
@@ -1612,16 +1618,16 @@ class AutoBalance_UnitScript : public UnitScript
             {
                 uint8 difficulty = GetGroupDifficulty(group);
                 if(difficulty == 2) {
-                    newdamage = newdamage * StatModifier_SpellDamage * 1.15;
+                    newdamage = newdamage * StatModifier_DoTDamage * 0.50;
                 }
                 else if(difficulty == 3) {
-                    newdamage = newdamage * StatModifier_SpellDamage * 1.25;
+                    newdamage = newdamage * StatModifier_DoTDamage * 0.75;
                 }
                 else if(difficulty == 4) {
-                    newdamage = newdamage * StatModifier_SpellDamage * 1.50;
+                    newdamage = newdamage * StatModifier_DoTDamage * 1.20;
                 }
                 else {
-                    newdamage = newdamage * StatModifier_SpellDamage;
+                    newdamage = newdamage * StatModifier_DoTDamage;
                 }
             }
         }
@@ -1640,7 +1646,7 @@ class AutoBalance_UnitScript : public UnitScript
             {
                 uint8 difficulty = GetGroupDifficulty(group);
                 if(difficulty == 2) {
-                    newdamage = newdamage * StatModifier_SpellDamage * 0.55;
+                    newdamage = newdamage * StatModifier_SpellDamage * 0.50;
                 }
                 else if(difficulty == 3) {
                     newdamage = newdamage * StatModifier_SpellDamage * 0.75;
@@ -1669,13 +1675,13 @@ class AutoBalance_UnitScript : public UnitScript
             {
                 uint8 difficulty = GetGroupDifficulty(group);
                 if(difficulty == 2) {
-                    newdamage = newdamage * StatModifier_SpellDamage * 1.15;
+                    newdamage = newdamage * StatModifier_SpellDamage * 1.0;
                 }
                 else if(difficulty == 3) {
-                    newdamage = newdamage * StatModifier_SpellDamage * 1.25;
+                    newdamage = newdamage * StatModifier_SpellDamage * 1.15;
                 }
                 else if(difficulty == 4) {
-                    newdamage = newdamage * StatModifier_SpellDamage * 1.50;
+                    newdamage = newdamage * StatModifier_SpellDamage * 1.25;
                 }
                 else {
                     newdamage = newdamage * StatModifier_SpellDamage;
@@ -2285,10 +2291,16 @@ public:
                 LOG_DEBUG("module.AutoBalance", "AutoBalance_AllCreatureScript::ModifyCreatureAttributes: Creature {} ({}) scaled to {} via fixed scaling.", creature->GetName(), creatureABInfo->UnmodifiedLevel, selectedLevel);
             }
 
-            if (mapABInfo->customDifficulty == 2)
+            // Overwrite levels for harder difficulties
+            if (mapABInfo->customDifficulty == GROUP_DIFFICULTY_MYTHIC  )
             {
                 selectedLevel = 83;
             }
+            if (mapABInfo->customDifficulty == GROUP_DIFFICULTY_LEGENDARY || mapABInfo->customDifficulty == GROUP_DIFFICULTY_ASCENDANT)
+            {
+                selectedLevel = 85;
+            }
+
 
             creatureABInfo->selectedLevel = selectedLevel;
             creature->SetLevel(creatureABInfo->selectedLevel);
@@ -3448,6 +3460,40 @@ public:
         }
 
         CharacterDatabase.DirectExecute("DELETE FROM group_difficulty WHERE guid = {}", group->GetGUID().GetCounter());
+    }
+};
+
+// this adds in the custom difficulties configurations for mythic, legendary, and ascendant
+class AutoBalance_DifficultyScript : public ABModuleScript {
+public:
+    AutoBalance_DifficultyScript() : ABModuleScript("AutoBalance_DifficultyScript") { }
+
+    bool OnAfterDefaultMultiplier(Creature* creature, float &defaultMultiplier)
+    {
+
+        AutoBalanceMapInfo *mapABInfo = creature->GetMap()->CustomData.GetDefault<AutoBalanceMapInfo>("AutoBalanceMapInfo");
+        if (!mapABInfo)
+            return true;
+
+        if (mapABInfo->customDifficulty != 0)
+        {
+            switch (mapABInfo->customDifficulty)
+            {
+                case GROUP_DIFFICULTY_MYTHIC:
+                    defaultMultiplier *= MythicMultiplier;
+                    break;
+                case GROUP_DIFFICULTY_LEGENDARY:
+                    defaultMultiplier *= LegendaryMultiplier;
+                    break;
+                case GROUP_DIFFICULTY_ASCENDANT:
+                    defaultMultiplier *= AscendantMultiplier;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return true;
     }
 };
 
