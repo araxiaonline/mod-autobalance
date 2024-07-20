@@ -11,6 +11,26 @@
 #        Default:     1 (1 = ON, 0 = OFF)
 AutoBalance.Enable.Global=1
 
+##########################
+#
+#     AutoBalance.MythicPlus Multipliers
+#       Multipliers for Mythic+ dungeons. These are applied to the base multipliers for the instance size.
+#       Defaults shown are the same as the base multipliers.
+#
+AutoBalance.MythicMultiplier=1.25
+AutoBalance.LegendaryMultiplier=1.50
+AutoBalance.AscendantMultiplier=2.0
+
+##########################
+#
+#     AutoBalance.StatModifier
+#        Adjusts the difficulty spell related damage after nerf.
+#        These values are multipliers that are applied to the base stats of creatures.
+#        Default: 1.0
+#
+AutoBalance.StatModifier.DoTDamage=1.0
+AutoBalance.StatModifier.SpellDamage=1.0
+
 #
 #     AutoBalance.Enabled.*
 #        Enable/Disable all features for each instance size and difficulty.

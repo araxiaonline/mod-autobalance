@@ -1394,9 +1394,9 @@ class AutoBalance_WorldScript : public WorldScript
         MaxCCDurationModifier = sConfigMgr->GetOption<float>("AutoBalance.MaxCCDurationModifier", 1.0f);
 
         // Advanced Difficulty Scaling
-        MythicMultiplier = sConfigMgr->GetOption<float>("AutoBalance.MythicMultiplier", 1.0f);
-        LegendaryMultiplier = sConfigMgr->GetOption<float>("AutoBalance.LegendaryMultiplier", 1.2f);
-        AscendantMultiplier = sConfigMgr->GetOption<float>("AutoBalance.AscendantMultiplier", 1.55f);
+        MythicMultiplier = sConfigMgr->GetOption<float>("AutoBalance.MythicMultiplier", 1.25f);
+        LegendaryMultiplier = sConfigMgr->GetOption<float>("AutoBalance.LegendaryMultiplier", 1.5f);
+        AscendantMultiplier = sConfigMgr->GetOption<float>("AutoBalance.AscendantMultiplier", 2.0f);
 
         // LevelScaling.*
         LevelScaling = sConfigMgr->GetOption<bool>("AutoBalance.LevelScaling", true);
@@ -1646,10 +1646,10 @@ class AutoBalance_UnitScript : public UnitScript
             {
                 uint8 difficulty = GetGroupDifficulty(group);
                 if(difficulty == 2) {
-                    newdamage = newdamage * StatModifier_SpellDamage * 0.50;
+                    newdamage = newdamage * StatModifier_SpellDamage * 0.80;
                 }
                 else if(difficulty == 3) {
-                    newdamage = newdamage * StatModifier_SpellDamage * 0.75;
+                    newdamage = newdamage * StatModifier_SpellDamage * 1.0;
                 }
                 else if(difficulty == 4) {
                     newdamage = newdamage * StatModifier_SpellDamage * 1.20;
@@ -1675,16 +1675,16 @@ class AutoBalance_UnitScript : public UnitScript
             {
                 uint8 difficulty = GetGroupDifficulty(group);
                 if(difficulty == 2) {
-                    newdamage = newdamage * StatModifier_SpellDamage * 1.0;
+                    newdamage = newdamage * 1.0;
                 }
                 else if(difficulty == 3) {
-                    newdamage = newdamage * StatModifier_SpellDamage * 1.15;
+                    newdamage = newdamage * 1.30;
                 }
                 else if(difficulty == 4) {
-                    newdamage = newdamage * StatModifier_SpellDamage * 1.25;
+                    newdamage = newdamage * 2.0;
                 }
                 else {
-                    newdamage = newdamage * StatModifier_SpellDamage;
+                    newdamage = newdamage;
                 }
             }
         }
@@ -3364,13 +3364,12 @@ public:
 
         // 2. Is the loot quality rare or higher?
         if (newItem->Quality < 3) {
-            LOG_INFO("server", "> OnBeforeDropAddItem:   Quality {}", newItem->Quality);
             return;
         }
 
         if(!group)
         {
-            LOG_INFO("server", "> OnBeforeDropAddItem:              Player {} is not in a group.", player->GetName());
+            LOG_INFO("server", "> OnBeforeDropAddItem: Player {} is not in a group.", player->GetName());
             return;
         }
 
@@ -3399,7 +3398,6 @@ public:
 
         if (GetGroupDifficulty(group) < 2)
         {
-            LOG_INFO("server", "> OnBeforeDropAddItem: Group Difficulty {}", GetGroupDifficulty(group));
             return;
         }
 
@@ -3481,12 +3479,15 @@ public:
             {
                 case GROUP_DIFFICULTY_MYTHIC:
                     defaultMultiplier *= MythicMultiplier;
+                    LOG_INFO("server", "> OnAfterDefaultMultiplier: MythicMultiplier being applied {}", MythicMultiplier);
                     break;
                 case GROUP_DIFFICULTY_LEGENDARY:
+                    LOG_INFO("server", "> OnAfterDefaultMultiplier: LegendaryMultiplier being applied {}", LegendaryMultiplier);
                     defaultMultiplier *= LegendaryMultiplier;
                     break;
                 case GROUP_DIFFICULTY_ASCENDANT:
                     defaultMultiplier *= AscendantMultiplier;
+                    LOG_INFO("server", "> OnAfterDefaultMultiplier: AscendantMultiplier being applied {}", AscendantMultiplier);
                     break;
                 default:
                     break;
@@ -3495,6 +3496,37 @@ public:
 
         return true;
     }
+
+     virtual bool OnBeforeUpdateStats(Creature* creature, uint32 &scaledHealth, uint32 &scaledMana, float &damageMultiplier, uint32 &newBaseArmor) {
+
+        AutoBalanceMapInfo *mapABInfo = creature->GetMap()->CustomData.GetDefault<AutoBalanceMapInfo>("AutoBalanceMapInfo");
+        if (!mapABInfo)
+            return true;
+
+        if (mapABInfo->customDifficulty != 0)
+        {
+            switch (mapABInfo->customDifficulty)
+            {
+                case GROUP_DIFFICULTY_MYTHIC:
+                    scaledHealth *= MythicMultiplier;
+                    LOG_INFO("server", "> OnAfterDefaultMultiplier: MythicMultiplier being applied {}", MythicMultiplier);
+                    break;
+                case GROUP_DIFFICULTY_LEGENDARY:
+                    scaledHealth *= LegendaryMultiplier;
+                    LOG_INFO("server", "> OnAfterDefaultMultiplier: LegendaryMultiplier being applied {}", LegendaryMultiplier);
+
+                    break;
+                case GROUP_DIFFICULTY_ASCENDANT:
+                    scaledHealth *= AscendantMultiplier;
+                    LOG_INFO("server", "> OnAfterDefaultMultiplier: AscendantMultiplier being applied {}", AscendantMultiplier);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return true;
+     }
 };
 
 void AddAutoBalanceScripts()
