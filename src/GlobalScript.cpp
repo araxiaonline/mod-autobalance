@@ -1,4 +1,10 @@
 #include "ScriptMgr.h"
+#include "AutoBalance.h"
+#include "Player.h"
+#include "Map.h"
+#include "Log.h"
+#include "LootMgr.h"
+
 
 
 class AutoBalance_GlobalScript : public GlobalScript {
@@ -127,7 +133,12 @@ public:
             LOG_INFO("server", "> OnBeforeDropAddItem:              New Loot Item not found");
             return;
         } else {
-            LOG_INFO("server", "> OnBeforeDropAddItem:  New ITEM        ItemName {} Quality {} ItemLevel {}", lookupItem->Name1, lookupItem->Quality, lookupItem->ItemLevel);
+            LOG_INFO(
+                "server", "> OnBeforeDropAddItem:  New ITEM        ItemName {} Quality {} ItemLevel {}",
+                lookupItem->Name1,
+                lookupItem->Quality,
+                lookupItem->ItemLevel
+            );
             LootStoreItem->itemid = newItemId;
 
             // Revalidate the LootStoreItem to ensure consistency
@@ -137,8 +148,12 @@ public:
             }
 
             // Optionally log other properties for debugging
-            LOG_INFO("server", "> OnBeforeDropAddItem: Updated LootStoreItem properties - reference {}, mincount {}, maxcount {}",
-            LootStoreItem->reference, LootStoreItem->mincount, LootStoreItem->maxcount);
+            LOG_INFO(
+                "server", "> OnBeforeDropAddItem: Updated LootStoreItem properties - reference {}, mincount {}, maxcount {}",
+                LootStoreItem->reference,
+                LootStoreItem->mincount,
+                LootStoreItem->maxcount
+            );
 
         }
 

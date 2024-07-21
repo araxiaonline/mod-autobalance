@@ -1,6 +1,5 @@
 #include "ScriptMgr.h"
 
-
 class AutoBalance_AllCreatureScript : public AllCreatureScript
 {
 public:
@@ -12,7 +11,12 @@ public:
     void Creature_SelectLevel(const CreatureTemplate* /*creatureTemplate*/, Creature* creature) override
     {
         if (creature->GetMap()->IsDungeon())
-            LOG_DEBUG("module.AutoBalance", "AutoBalance_AllCreatureScript::Creature_SelectLevel(): {} ({})", creature->GetName(), creature->GetLevel());
+            LOG_DEBUG(
+                "module.AutoBalance",
+                "AutoBalance_AllCreatureScript::Creature_SelectLevel(): {} ({})",
+                creature->GetName(),
+                creature->GetLevel()
+            );
 
         // add the creature to the map's tracking list
         sAutoBalancer->AddCreatureToMapData(creature, true, nullptr, false);
@@ -25,13 +29,23 @@ public:
     void OnCreatureAddWorld(Creature* creature) override
     {
         if (creature->GetMap()->IsDungeon())
-            LOG_DEBUG("module.AutoBalance", "AutoBalance_AllCreatureScript::OnCreatureAddWorld(): {} ({})", creature->GetName(), creature->GetLevel());
+            LOG_DEBUG(
+                "module.AutoBalance",
+                "AutoBalance_AllCreatureScript::OnCreatureAddWorld(): {} ({})",
+                creature->GetName(),
+                creature->GetLevel()
+            );
     }
 
     void OnCreatureRemoveWorld(Creature* creature) override
     {
         if (creature->GetMap()->IsDungeon())
-            LOG_DEBUG("module.AutoBalance", "AutoBalance_AllCreatureScript::OnCreatureRemoveWorld(): {} ({})", creature->GetName(), creature->GetLevel());
+            LOG_DEBUG(
+                "module.AutoBalance",
+                "AutoBalance_AllCreatureScript::OnCreatureRemoveWorld(): {} ({})",
+                creature->GetName(),
+                creature->GetLevel()
+            );
 
         // remove the creature from the map's tracking list, if present
         sAutoBalancer->RemoveCreatureFromMapData(creature);
@@ -42,7 +56,12 @@ public:
         // If the config is out of date and the creature was reset, run modify against it
         if (ResetCreatureIfNeeded(creature))
         {
-            LOG_DEBUG("module.AutoBalance", "AutoBalance_AllCreatureScript::OnAllCreatureUpdate(): Creature {} ({}) is reset to its original stats.", creature->GetName(), creature->GetLevel());
+            LOG_DEBUG(
+                "module.AutoBalance",
+                "AutoBalance_AllCreatureScript::OnAllCreatureUpdate(): Creature {} ({}) is reset to its original stats.",
+                creature->GetName(),
+                creature->GetLevel()
+            );
 
             // Update the map's level if it is out of date
             sAutoBalancer->UpdateMapLevelIfNeeded(creature->GetMap());
@@ -57,7 +76,6 @@ public:
         // make sure we have a creature and that it's assigned to a map
         if (!creature || !creature->GetMap())
             return false;
-
 
         // if this isn't a dungeon or a battleground, make no changes
         if (!(creature->GetMap()->IsDungeon() || creature->GetMap()->IsRaid()))
@@ -79,7 +97,12 @@ public:
         if (creatureABInfo->UnmodifiedLevel < (float)mapABInfo->lfgMinLevel * .85f)
         {
             if (creatureABInfo->configTime == 0)
-                LOG_DEBUG("module.AutoBalance", "AutoBalance_AllCreatureScript::ResetCreatureIfNeeded(): {} ({}) is below 85% of the LFG min level for the map, do not reset or modify.", creature->GetName(), creatureABInfo->UnmodifiedLevel);
+                LOG_DEBUG(
+                    "module.AutoBalance",
+                    "AutoBalance_AllCreatureScript::ResetCreatureIfNeeded(): {} ({}) is below 85% of the LFG min level for the map, do not reset or modify.",
+                    creature->GetName(),
+                    creatureABInfo->UnmodifiedLevel
+                );
 
             creatureABInfo->configTime = sAutoBalancer->lastConfigTime;
             return false;
@@ -89,7 +112,12 @@ public:
         if (creatureABInfo->UnmodifiedLevel > (float)mapABInfo->lfgMaxLevel * 1.15f)
         {
             if (creatureABInfo->configTime == 0)
-                LOG_DEBUG("module.AutoBalance", "AutoBalance_AllCreatureScript::ResetCreatureIfNeeded(): {} ({}) is above 115% of the LFG max level for the map, do not reset or modify.", creature->GetName(), creatureABInfo->UnmodifiedLevel);
+                LOG_DEBUG(
+                    "module.AutoBalance",
+                    "AutoBalance_AllCreatureScript::ResetCreatureIfNeeded(): {} ({}) is above 115% of the LFG max level for the map, do not reset or modify.",
+                    creature->GetName(),
+                    creatureABInfo->UnmodifiedLevel
+                );
 
             creatureABInfo->configTime = sAutoBalancer->lastConfigTime;
             return false;
@@ -104,7 +132,12 @@ public:
         // also remember that this creature was once alive but is now dead
         else if (creature->isDead())
         {
-            LOG_DEBUG("module.AutoBalance", "AutoBalance_AllCreatureScript::ResetCreatureIfNeeded(): {} ({}) is dead and configTime is not 0 - prime for reset if revived.", creature->GetName(), creature->GetLevel());
+            LOG_DEBUG(
+                "module.AutoBalance",
+                "AutoBalance_AllCreatureScript::ResetCreatureIfNeeded(): {} ({}) is dead and configTime is not 0 - prime for reset if revived.",
+                creature->GetName(),
+                creature->GetLevel()
+            );
             creatureABInfo->configTime = 0;
             creatureABInfo->wasAliveNowDead = true;
             return false;
@@ -209,14 +242,24 @@ public:
         // if the creature was dead (but this function is being called because they are being revived), reset it and allow modifications
         if (creatureABInfo->wasAliveNowDead)
         {
-            LOG_DEBUG("module.AutoBalance", "AutoBalance_AllCreatureScript::ModifyCreatureAttributes(): {} ({}) was dead but appears to be alive now, reset wasAliveNowDead flag.", creature->GetName(), creatureABInfo->UnmodifiedLevel);
+            LOG_DEBUG(
+                "module.AutoBalance",
+                "AutoBalance_AllCreatureScript::ModifyCreatureAttributes(): {} ({}) was dead but appears to be alive now, reset wasAliveNowDead flag.",
+                creature->GetName(),
+                creatureABInfo->UnmodifiedLevel
+            );
             // if the creature was dead, reset it
             creatureABInfo->wasAliveNowDead = false;
         }
         // if the creature is dead and wasn't marked as dead by this script, simply skip
         else if (creature->isDead())
         {
-            LOG_DEBUG("module.AutoBalance", "AutoBalance_AllCreatureScript::ModifyCreatureAttributes(): {} ({}) is dead, do not modify.", creature->GetName(), creatureABInfo->UnmodifiedLevel);
+            LOG_DEBUG(
+                "module.AutoBalance",
+                "AutoBalance_AllCreatureScript::ModifyCreatureAttributes(): {} ({}) is dead, do not modify.",
+                creature->GetName(),
+                creatureABInfo->UnmodifiedLevel
+            );
             return;
         }
 
@@ -232,9 +275,16 @@ public:
         int forcedNumPlayers = sAutoBalancer->GetForcedNumPlayers(creatureTemplate->Entry);
 
         if (forcedNumPlayers > 0)
-            maxNumberOfPlayers = forcedNumPlayers; // Force maxNumberOfPlayers to be changed to match the Configuration entries ForcedID2, ForcedID5, ForcedID10, ForcedID20, ForcedID25, ForcedID40
+        {
+            // Force maxNumberOfPlayers to be changed to match the Configuration entries
+            // ForcedID2, ForcedID5, ForcedID10, ForcedID20, ForcedID25, ForcedID40
+            maxNumberOfPlayers = forcedNumPlayers;
+        }
         else if (forcedNumPlayers == 0)
-            return; // forcedNumPlayers 0 means that the creature is contained in DisabledID -> no scaling
+        {
+            // forcedNumPlayers 0 means that the creature is contained in DisabledID -> no scaling
+            return;
+        }
 
         uint32 curCount=mapABInfo->playerCount + sAutoBalancer->PlayerCountDifficultyOffset;
         if (sAutoBalancer->perDungeonScalingEnabled())
@@ -243,7 +293,8 @@ public:
         }
         creatureABInfo->instancePlayerCount = curCount;
 
-        if (!creatureABInfo->instancePlayerCount) // no players in map, do not modify attributes
+        // no players in map, do not modify attributes
+        if (!creatureABInfo->instancePlayerCount)
             return;
 
         if (!sABScriptMgr->OnBeforeModifyAttributes(creature, creatureABInfo->instancePlayerCount))
@@ -856,7 +907,7 @@ public:
         //
         float manaStatsRate  = 1.0f;
         float newMana = creatureStats->GenerateMana(creatureTemplate);
-            manaStatsRate = newMana/float(baseMana);
+        manaStatsRate = newMana/float(baseMana);
 
         // check to be sure that manaStatsRate is not nan
         if (manaStatsRate != manaStatsRate)

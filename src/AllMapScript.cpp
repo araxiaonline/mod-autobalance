@@ -85,7 +85,8 @@ class AutoBalance_AllMapScript : public AllMapScript
 
                                 std::string instanceDifficulty; if (instanceMap->IsHeroic()) instanceDifficulty = "Heroic"; else instanceDifficulty = "Normal";
 
-                                chatHandle.PSendSysMessage("|cffFF0000 [AutoBalance]|r|cffFF8000 %s enters %s (%u-player %s). Player count set to %u (Player Difficulty Offset = %u) |r",
+                                chatHandle.PSendSysMessage(
+                                    "|cffFF0000 [AutoBalance]|r|cffFF8000 %s enters %s (%u-player %s). Player count set to %u (Player Difficulty Offset = %u) |r",
                                     player->GetName().c_str(),
                                     map->GetMapName(),
                                     instanceMap->GetMaxPlayers(),

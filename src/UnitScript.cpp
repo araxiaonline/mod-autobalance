@@ -1,6 +1,5 @@
 #include "ScriptMgr.h"
 
-
 class AutoBalance_UnitScript : public UnitScript
 {
     public:
