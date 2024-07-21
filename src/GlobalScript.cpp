@@ -4,6 +4,7 @@
 #include "Map.h"
 #include "Log.h"
 #include "LootMgr.h"
+#include "Chat.h"
 
 
 

@@ -1,6 +1,9 @@
 #include "ScriptMgr.h"
 #include "Log.h"
 #include "Player.h"
+#include "AutoBalancer.h"
+#include "Chat.h"
+#include "MapMgr.h"
 
 class AutoBalance_AllMapScript : public AllMapScript
 {

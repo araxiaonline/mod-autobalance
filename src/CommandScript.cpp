@@ -7,6 +7,8 @@
 #include "ScriptedEscortAI.h"
 #include "ScriptedGossip.h"
 #include "WorldSession.h"
+#include "Chat.h"
+#include "AutoBalancer.h"
 
 #if AC_COMPILER == AC_COMPILER_GNU
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"

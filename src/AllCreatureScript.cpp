@@ -1,4 +1,6 @@
 #include "ScriptMgr.h"
+#include "AutoBalancer.h"
+#include "MapMgr.h"
 
 class AutoBalance_AllCreatureScript : public AllCreatureScript
 {

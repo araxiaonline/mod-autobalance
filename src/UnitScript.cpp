@@ -1,4 +1,6 @@
 #include "ScriptMgr.h"
+#include "Player.h"
+#include "AutoBalancer.h"
 
 class AutoBalance_UnitScript : public UnitScript
 {
