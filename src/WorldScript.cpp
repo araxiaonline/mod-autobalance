@@ -4,7 +4,6 @@
 #include "Chat.h"
 #include "Player.h"
 
-
 class AutoBalance_WorldScript : public WorldScript
 {
     public:
@@ -437,3 +436,8 @@ class AutoBalance_WorldScript : public WorldScript
 
     }
 };
+
+void AddWorldScripts()
+{
+    new AutoBalance_WorldScript();
+}

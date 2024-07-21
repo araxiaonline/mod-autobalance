@@ -1106,3 +1106,8 @@ private:
         return inputCount < minPlayers ? minPlayers : inputCount;
     }
 };
+
+void AddAllCreatureScripts()
+{
+    new AutoBalance_AllCreatureScript();
+}

@@ -239,3 +239,8 @@ public:
         return true;
     }
 };
+
+void AddCommandScripts()
+{
+    new AutoBalance_CommandScript();
+}

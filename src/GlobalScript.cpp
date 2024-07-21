@@ -162,3 +162,8 @@ public:
 
     }
 };
+
+void AddGlobalScripts()
+{
+    new AutoBalance_GlobalScript();
+}

@@ -1,7 +1,6 @@
 #ifndef AUTOBALANCER_H
 #define AUTOBALANCER_H
 
-#include "AutoBalance.h"
 #include <vector>
 
 class AutoBalancer
@@ -79,7 +78,9 @@ public:
     static int8 LevelScalingDynamicLevelCeilingDungeons, LevelScalingDynamicLevelFloorDungeons, LevelScalingDynamicLevelCeilingRaids, LevelScalingDynamicLevelFloorRaids;
     static int8 LevelScalingDynamicLevelCeilingHeroicDungeons, LevelScalingDynamicLevelFloorHeroicDungeons, LevelScalingDynamicLevelCeilingHeroicRaids, LevelScalingDynamicLevelFloorHeroicRaids;
     static ScalingMethod LevelScalingMethod;
-    static uint32 rewardRaid, rewardDungeon, MinPlayerReward;
+    static uint32 rewardRaid;
+    static uint32 rewardDungeon;
+    static uint32 MinPlayerReward;
     static bool Announcement;
     static bool LevelScalingEndGameBoost, PlayerChangeNotify, rewardEnabled;
     static float MinHPModifier, MinManaModifier, MinDamageModifier, MinCCDurationModifier, MaxCCDurationModifier;
@@ -140,12 +141,12 @@ public:
     static float StatModifierRaid25MHeroic_Boss_Global, StatModifierRaid25MHeroic_Boss_Health, StatModifierRaid25MHeroic_Boss_Mana, StatModifierRaid25MHeroic_Boss_Armor, StatModifierRaid25MHeroic_Boss_Damage, StatModifierRaid25MHeroic_Boss_CCDuration;
     static float StatModifierRaid40M_Boss_Global, StatModifierRaid40M_Boss_Health, StatModifierRaid40M_Boss_Mana, StatModifierRaid40M_Boss_Armor, StatModifierRaid40M_Boss_Damage, StatModifierRaid40M_Boss_CCDuration;
 
-    static AutoBalancer * getInstanct() {
+    static AutoBalancer * getInstance() {
         static AutoBalancer instance;
         return &instance;
     }
 };
 
-#define sAutoBalancer AutoBalancer::getInstanct()
+#define sAutoBalancer AutoBalancer::getInstance()
 
 #endif

@@ -46,15 +46,6 @@
 #include "Log.h"
 #include <chrono>
 
-#include "AutoBalancer.h"
-#include "WorldScript.cpp"
-#include "PlayerScript.cpp"
-#include "UnitScript.cpp"
-#include "AllMapScript.cpp"
-#include "AllCreatureScript.cpp"
-#include "CommandScript.cpp"
-#include "GlobalScript.cpp"
-
 using namespace Acore::ChatCommands;
 
 ABScriptMgr* ABScriptMgr::instance()
@@ -113,37 +104,6 @@ ABModuleScript::ABModuleScript(const char* name)
 {
     ScriptRegistry<ABModuleScript>::AddScript(this);
 }
-
-// this handles updating custom group difficulties used in auto balancing mobs and
-// scripts that enable buffs on mobs randomly
-class AutoBalance_GroupScript : public GroupScript {
-public:
-    AutoBalance_GroupScript() : GroupScript("AutoBalance_GroupScript") { }
-
-    void OnCreate(Group* group, Player* leader) override {
-        if (!group) {
-            return;
-        }
-
-        if(!leader) {
-            return;
-        }
-
-        // default difficulty is whatever the player currently has it set as
-        uint8 difficulty = leader->GetDifficulty(false);
-
-        CharacterDatabase.DirectExecute("INSERT INTO group_difficulty (guid, difficulty) VALUES ({}, {}) ON DUPLICATE KEY UPDATE difficulty = {}",
-            group->GetGUID().GetCounter(), difficulty, difficulty);
-    }
-
-    void OnDisband(Group* group) override {
-        if (!group) {
-            return;
-        }
-
-        CharacterDatabase.DirectExecute("DELETE FROM group_difficulty WHERE guid = {}", group->GetGUID().GetCounter());
-    }
-};
 
 // this adds in the custom difficulties configurations for mythic, legendary, and ascendant
 class AutoBalance_DifficultyScript : public ABModuleScript {
@@ -215,12 +175,4 @@ public:
 
 void AddAutoBalanceScripts()
 {
-    new AutoBalance_WorldScript();
-    new AutoBalance_PlayerScript();
-    new AutoBalance_UnitScript();
-    new AutoBalance_AllCreatureScript();
-    new AutoBalance_AllMapScript();
-    new AutoBalance_CommandScript();
-    new AutoBalance_GlobalScript();
-    new AutoBalance_GroupScript();
 }

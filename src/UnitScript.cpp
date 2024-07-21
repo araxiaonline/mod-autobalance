@@ -224,3 +224,8 @@ class AutoBalance_UnitScript : public UnitScript
         }
     }
 };
+
+void AddUnitScripts()
+{
+    new AutoBalance_UnitScript();
+}

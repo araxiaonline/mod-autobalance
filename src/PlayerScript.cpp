@@ -171,3 +171,8 @@ class AutoBalance_PlayerScript : public PlayerScript
             }
         }
 };
+
+void AddPlayerScripts()
+{
+    new AutoBalance_PlayerScript();
+}

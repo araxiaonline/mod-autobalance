@@ -199,3 +199,8 @@ class AutoBalance_AllMapScript : public AllMapScript
             }
         }
 };
+
+void AddAllMapScripts()
+{
+    new AutoBalance_AllMapScript();
+}
