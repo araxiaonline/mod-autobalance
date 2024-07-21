@@ -1,6 +1,7 @@
 #ifndef AUTOBALANCER_H
 #define AUTOBALANCER_H
 
+#include "AutoBalance.h"
 #include <vector>
 
 class AutoBalancer
