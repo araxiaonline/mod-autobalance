@@ -3338,34 +3338,22 @@ public:
             return;
         }
 
+        if(player->GetLevel() < 80) {
+            return;
+        }
+
         ItemTemplate const* newItem = sObjectMgr->GetItemTemplate(LootStoreItem->itemid);
         if (!newItem) {
             LOG_INFO("server", "> OnBeforeDropAddItem: Item not found for itemid {}", LootStoreItem->itemid);
             return;
         }
 
-        Map* map = player->GetMap();
-        const Group* group = player->GetGroup();
-
-        // 3 things things need to happen
-        // 1. Is the instance scaled up to max level or beyond?
-        // 2. Is the loot quality rare or higher?
-        // 3. What is the difficulty of the instances?  2 - Mythic 3 - Legendary 4 - Ascendant
-
-        // 1. Is the instance scaled up to max level or beyond?
-        AutoBalanceMapInfo *mapABInfo = map->CustomData.GetDefault<AutoBalanceMapInfo>("AutoBalanceMapInfo");
-        if (!mapABInfo || !mapABInfo->isLevelScalingEnabled || player->getLevel() < 80)
-        {
-            return;
-        }
-
-        // The items are deterministic based ont the id just need to add the correct id starting point
-        uint32 idStart = 0;
-
-        // 2. Is the loot quality rare or higher?
         if (newItem->Quality < 3) {
             return;
         }
+
+        Map* map = player->GetMap();
+        const Group* group = player->GetGroup();
 
         if(!group)
         {
@@ -3374,31 +3362,38 @@ public:
         }
 
         uint8 grpDifficulty = GetGroupDifficulty(group);
-
-        // 3. What is the difficulty of the instances?  2 - Mythic 3 - Legendary 4 - Ascendant
-        switch(grpDifficulty) {
-            case 2:
-                idStart = 20000000;
-                break;
-            case 3:
-                idStart = 21000000;
-                break;
-            case 4:
-                idStart = 22000000;
-                break;
-            default:
-                break;
-        }
-
-        if (!group)
-        {
-            ChatHandler(player->GetSession()).PSendSysMessage("autobalance: player {} is not in a group.", player->GetName());
-            return;
-        }
-
         if (GetGroupDifficulty(group) < 2)
         {
             return;
+        }
+
+        // 3 things things need to happen
+        // 1. Is the instance scaled up to max level or beyond?
+        // 2. Is the loot quality rare or higher?
+        // 3. What is the difficulty of the instances?  2 - Mythic 3 - Legendary 4 - Ascendant
+
+        // 1. Is the instance scaled up to max level or beyond?
+        AutoBalanceMapInfo *mapABInfo = map->CustomData.GetDefault<AutoBalanceMapInfo>("AutoBalanceMapInfo");
+        if (!mapABInfo->isLevelScalingEnabled)
+        {
+            return;
+        }
+
+        // The items are deterministic based ont the id just need to add the correct id starting point
+        uint32 idStart;
+        switch(grpDifficulty) {
+            case 2:   // Mythic
+                idStart = 20000000;
+                break;
+            case 3:  // Legendary
+                idStart = 21000000;
+                break;
+            case 4:  // Ascendant
+                idStart = 22000000;
+                break;
+            default:
+                idStart = 0;
+                break;
         }
 
         // LOG_INFO("server", "> OnBeforeDropAddItem:              Current Loot Drop Item {}", LootStoreItem->itemid);
