@@ -12,7 +12,7 @@ public:
 
     void Creature_SelectLevel(const CreatureTemplate* /*creatureTemplate*/, Creature* creature) override
     {
-        if (creature->GetMap()->IsDungeon())
+        if (creature->GetMap()->IsDungeon() || creature->GetMap()->IsRaid())
             LOG_DEBUG(
                 "module.AutoBalance",
                 "AutoBalance_AllCreatureScript::Creature_SelectLevel(): {} ({})",
@@ -30,7 +30,7 @@ public:
 
     void OnCreatureAddWorld(Creature* creature) override
     {
-        if (creature->GetMap()->IsDungeon())
+        if (creature->GetMap()->IsDungeon() || creature->GetMap()->IsRaid())
             LOG_DEBUG(
                 "module.AutoBalance",
                 "AutoBalance_AllCreatureScript::OnCreatureAddWorld(): {} ({})",
@@ -41,7 +41,7 @@ public:
 
     void OnCreatureRemoveWorld(Creature* creature) override
     {
-        if (creature->GetMap()->IsDungeon())
+        if (creature->GetMap()->IsDungeon() || creature->GetMap()->IsRaid())
             LOG_DEBUG(
                 "module.AutoBalance",
                 "AutoBalance_AllCreatureScript::OnCreatureRemoveWorld(): {} ({})",
@@ -288,7 +288,7 @@ public:
             return;
         }
 
-        uint32 curCount=mapABInfo->playerCount + sAutoBalancer->PlayerCountDifficultyOffset;
+        uint32 curCount = mapABInfo->playerCount + sAutoBalancer->PlayerCountDifficultyOffset;
         if (sAutoBalancer->perDungeonScalingEnabled())
         {
             curCount = adjustCurCount(curCount, mapId);
