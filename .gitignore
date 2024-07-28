@@ -49,3 +49,4 @@ local.properties
 .loadpath
 .project
 .cproject
+.aider*
