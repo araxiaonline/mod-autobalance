@@ -4,6 +4,30 @@
 #include "AutoBalance.h"
 #include <vector>
 
+struct AutoBalancerStatModifier
+{
+    float GlobalVal;
+    float Health;
+    float Mana;
+    float Armor;
+    float Damage;
+    float CCDuration;
+    float DoTDamage;
+    float SpellDamage;
+
+    // Person(const std::string& n, int a) : name(n), age(a) {}
+    // AutoBalancerStatModifier(float g) : GlobalVal(g) { };
+};
+
+struct AutoBalancerInflectionPoint
+{
+    static float InflectionPoint;
+    static float CurveFloor;
+    static float CurveCeiling;
+    static float Boss;
+
+};
+
 class AutoBalancer
 {
 private:
@@ -141,6 +165,14 @@ public:
     static float StatModifierRaid25M_Boss_Global, StatModifierRaid25M_Boss_Health, StatModifierRaid25M_Boss_Mana, StatModifierRaid25M_Boss_Armor, StatModifierRaid25M_Boss_Damage, StatModifierRaid25M_Boss_CCDuration;
     static float StatModifierRaid25MHeroic_Boss_Global, StatModifierRaid25MHeroic_Boss_Health, StatModifierRaid25MHeroic_Boss_Mana, StatModifierRaid25MHeroic_Boss_Armor, StatModifierRaid25MHeroic_Boss_Damage, StatModifierRaid25MHeroic_Boss_CCDuration;
     static float StatModifierRaid40M_Boss_Global, StatModifierRaid40M_Boss_Health, StatModifierRaid40M_Boss_Mana, StatModifierRaid40M_Boss_Armor, StatModifierRaid40M_Boss_Damage, StatModifierRaid40M_Boss_CCDuration;
+
+    static std::map<uint8, AutoBalancerInflectionPoint> InfPointNormal;
+    static std::map<uint8, AutoBalancerInflectionPoint> InfPointHeroic;
+
+    static std::map<uint8, AutoBalancerStatModifier> StatsNormal;
+    static std::map<uint8, AutoBalancerStatModifier> StatsNormalBoss;
+    static std::map<uint8, AutoBalancerStatModifier> StatsHeroic;
+    static std::map<uint8, AutoBalancerStatModifier> StatsHeroicBoss;
 
     static AutoBalancer * getInstance() {
         static AutoBalancer instance;

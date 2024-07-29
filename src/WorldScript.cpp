@@ -184,6 +184,12 @@ class AutoBalance_WorldScript : public WorldScript
         if (sConfigMgr->GetOption<float>("AutoBalance.rate.damage", false, false))
             LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.rate.damage` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
 
+        // `AutoBalance.rate.global` for backwards compatibility
+        sAutoBalancer->StatsNormal[5] = AutoBalancerStatModifier();
+        // `AutoBalance.rate.global` for backwards compatibility
+        sAutoBalancer->StatsNormal[5].GlobalVal =
+            sConfigMgr->GetOption<float>("AutoBalance.StatModifier.Global", sConfigMgr->GetOption<float>("AutoBalance.rate.global", 1.0f, false), false);
+
         // 5-player dungeons
         sAutoBalancer->StatModifier_Global =                       sConfigMgr->GetOption<float>("AutoBalance.StatModifier.Global", sConfigMgr->GetOption<float>("AutoBalance.rate.global", 1.0f, false), false); // `AutoBalance.rate.global` for backwards compatibility
         sAutoBalancer->StatModifier_Health =                       sConfigMgr->GetOption<float>("AutoBalance.StatModifier.Health", sConfigMgr->GetOption<float>("AutoBalance.rate.health", 1.0f, false), false); // `AutoBalance.rate.health` for backwards compatibility
