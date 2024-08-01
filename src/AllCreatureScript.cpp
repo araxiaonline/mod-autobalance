@@ -13,8 +13,7 @@ public:
     void Creature_SelectLevel(const CreatureTemplate* /*creatureTemplate*/, Creature* creature) override
     {
         if (creature->GetMap()->IsDungeon() || creature->GetMap()->IsRaid())
-            LOG_DEBUG(
-                "module.AutoBalance",
+            LOG_DEBUG("module.AutoBalance",
                 "AutoBalance_AllCreatureScript::Creature_SelectLevel(): {} ({})",
                 creature->GetName(),
                 creature->GetLevel()
@@ -31,8 +30,7 @@ public:
     void OnCreatureAddWorld(Creature* creature) override
     {
         if (creature->GetMap()->IsDungeon() || creature->GetMap()->IsRaid())
-            LOG_DEBUG(
-                "module.AutoBalance",
+            LOG_DEBUG("module.AutoBalance",
                 "AutoBalance_AllCreatureScript::OnCreatureAddWorld(): {} ({})",
                 creature->GetName(),
                 creature->GetLevel()
@@ -42,8 +40,7 @@ public:
     void OnCreatureRemoveWorld(Creature* creature) override
     {
         if (creature->GetMap()->IsDungeon() || creature->GetMap()->IsRaid())
-            LOG_DEBUG(
-                "module.AutoBalance",
+            LOG_DEBUG("module.AutoBalance",
                 "AutoBalance_AllCreatureScript::OnCreatureRemoveWorld(): {} ({})",
                 creature->GetName(),
                 creature->GetLevel()
@@ -58,8 +55,7 @@ public:
         // If the config is out of date and the creature was reset, run modify against it
         if (ResetCreatureIfNeeded(creature))
         {
-            LOG_DEBUG(
-                "module.AutoBalance",
+            LOG_DEBUG("module.AutoBalance",
                 "AutoBalance_AllCreatureScript::OnAllCreatureUpdate(): Creature {} ({}) is reset to its original stats.",
                 creature->GetName(),
                 creature->GetLevel()
@@ -99,8 +95,7 @@ public:
         if (creatureABInfo->UnmodifiedLevel < (float)mapABInfo->lfgMinLevel * .85f)
         {
             if (creatureABInfo->configTime == 0)
-                LOG_DEBUG(
-                    "module.AutoBalance",
+                LOG_DEBUG("module.AutoBalance",
                     "AutoBalance_AllCreatureScript::ResetCreatureIfNeeded(): {} ({}) is below 85% of the LFG min level for the map, do not reset or modify.",
                     creature->GetName(),
                     creatureABInfo->UnmodifiedLevel
@@ -114,8 +109,7 @@ public:
         if (creatureABInfo->UnmodifiedLevel > (float)mapABInfo->lfgMaxLevel * 1.15f)
         {
             if (creatureABInfo->configTime == 0)
-                LOG_DEBUG(
-                    "module.AutoBalance",
+                LOG_DEBUG("module.AutoBalance",
                     "AutoBalance_AllCreatureScript::ResetCreatureIfNeeded(): {} ({}) is above 115% of the LFG max level for the map, do not reset or modify.",
                     creature->GetName(),
                     creatureABInfo->UnmodifiedLevel
@@ -134,8 +128,7 @@ public:
         // also remember that this creature was once alive but is now dead
         else if (creature->isDead())
         {
-            LOG_DEBUG(
-                "module.AutoBalance",
+            LOG_DEBUG("module.AutoBalance",
                 "AutoBalance_AllCreatureScript::ResetCreatureIfNeeded(): {} ({}) is dead and configTime is not 0 - prime for reset if revived.",
                 creature->GetName(),
                 creature->GetLevel()
@@ -244,8 +237,7 @@ public:
         // if the creature was dead (but this function is being called because they are being revived), reset it and allow modifications
         if (creatureABInfo->wasAliveNowDead)
         {
-            LOG_DEBUG(
-                "module.AutoBalance",
+            LOG_DEBUG("module.AutoBalance",
                 "AutoBalance_AllCreatureScript::ModifyCreatureAttributes(): {} ({}) was dead but appears to be alive now, reset wasAliveNowDead flag.",
                 creature->GetName(),
                 creatureABInfo->UnmodifiedLevel
@@ -256,8 +248,7 @@ public:
         // if the creature is dead and wasn't marked as dead by this script, simply skip
         else if (creature->isDead())
         {
-            LOG_DEBUG(
-                "module.AutoBalance",
+            LOG_DEBUG("module.AutoBalance",
                 "AutoBalance_AllCreatureScript::ModifyCreatureAttributes(): {} ({}) is dead, do not modify.",
                 creature->GetName(),
                 creatureABInfo->UnmodifiedLevel

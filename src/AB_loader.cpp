@@ -1,3 +1,5 @@
+#include "AutoBalancer.h"
+
 void AddAutoBalanceScripts();
 void AddAllCreatureScripts();
 void AddAllMapScripts();
@@ -11,4 +13,12 @@ void AddWorldScripts();
 void Addmod_autobalanceScripts()
 {
     AddAutoBalanceScripts();
+    AddAllCreatureScripts();
+    AddAllMapScripts();
+    AddCommandScripts();
+    AddGlobalScripts();
+    AddGroupScripts();
+    AddPlayerScripts();
+    AddUnitScripts();
+    AddWorldScripts();
 }

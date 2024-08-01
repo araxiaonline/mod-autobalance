@@ -17,7 +17,9 @@
 class AutoBalance_CommandScript : public CommandScript
 {
 public:
-    AutoBalance_CommandScript() : CommandScript("AutoBalance_CommandScript") { }
+    AutoBalance_CommandScript() : CommandScript("AutoBalance_CommandScript") {
+        LOG_DEBUG("module.AutoBalance", "Command Script Initializing");
+    }
 
     std::vector<ChatCommand> GetCommands() const
     {
@@ -37,7 +39,7 @@ public:
 
         static std::vector<ChatCommand> commandTable =
         {
-            { "autobalance",     SEC_PLAYER,                             false, NULL,                      "", ABCommandTable },
+            { "module.AutoBalance",     SEC_PLAYER,                             false, NULL,                      "", ABCommandTable },
             { "ab",              SEC_PLAYER,                             false, NULL,                      "", ABCommandTable },
         };
         return commandTable;
@@ -243,4 +245,5 @@ public:
 void AddCommandScripts()
 {
     new AutoBalance_CommandScript();
+    LOG_DEBUG("module.AutoBalance", "Registering CommandScript");
 }

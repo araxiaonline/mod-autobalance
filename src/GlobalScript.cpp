@@ -64,7 +64,7 @@ public:
 
         ItemTemplate const* newItem = sObjectMgr->GetItemTemplate(LootStoreItem->itemid);
         if (!newItem) {
-            LOG_INFO("server", "> OnBeforeDropAddItem: Item not found for itemid {}", LootStoreItem->itemid);
+            LOG_INFO("module.AutoBalance", "> OnBeforeDropAddItem: Item not found for itemid {}", LootStoreItem->itemid);
             return;
         }
 
@@ -93,7 +93,7 @@ public:
 
         if(!group)
         {
-            LOG_INFO("server", "> OnBeforeDropAddItem: Player {} is not in a group.", player->GetName());
+            LOG_INFO("module.AutoBalance", "> OnBeforeDropAddItem: Player {} is not in a group.", player->GetName());
             return;
         }
 
@@ -125,17 +125,16 @@ public:
             return;
         }
 
-        // LOG_INFO("server", "> OnBeforeDropAddItem:              Current Loot Drop Item {}", LootStoreItem->itemid);
+        // LOG_INFO("module.AutoBalance", "> OnBeforeDropAddItem:              Current Loot Drop Item {}", LootStoreItem->itemid);
         int newItemId = LootStoreItem->itemid + idStart;
 
         ItemTemplate const* lookupItem = sObjectMgr->GetItemTemplate(newItemId);
 
         if(!lookupItem) {
-            LOG_INFO("server", "> OnBeforeDropAddItem:              New Loot Item not found");
+            LOG_INFO("module.AutoBalance", "> OnBeforeDropAddItem:              New Loot Item not found");
             return;
         } else {
-            LOG_INFO(
-                "server", "> OnBeforeDropAddItem:  New ITEM        ItemName {} Quality {} ItemLevel {}",
+            LOG_INFO("module.AutoBalance", "> OnBeforeDropAddItem:  New ITEM        ItemName {} Quality {} ItemLevel {}",
                 lookupItem->Name1,
                 lookupItem->Quality,
                 lookupItem->ItemLevel
@@ -144,13 +143,12 @@ public:
 
             // Revalidate the LootStoreItem to ensure consistency
             if (!LootStoreItem->IsValid(store, newItemId)) {
-                LOG_ERROR("server", "> OnBeforeDropAddItem: LootStoreItem is not valid after updating itemid to {}", newItemId);
+                LOG_ERROR("module.AutoBalance", "> OnBeforeDropAddItem: LootStoreItem is not valid after updating itemid to {}", newItemId);
                 return;
             }
 
             // Optionally log other properties for debugging
-            LOG_INFO(
-                "server", "> OnBeforeDropAddItem: Updated LootStoreItem properties - reference {}, mincount {}, maxcount {}",
+            LOG_INFO("module.AutoBalance", "> OnBeforeDropAddItem: Updated LootStoreItem properties - reference {}, mincount {}, maxcount {}",
                 LootStoreItem->reference,
                 LootStoreItem->mincount,
                 LootStoreItem->maxcount
@@ -158,7 +156,7 @@ public:
 
         }
 
-        LOG_INFO("server", "> OnBeforeDropAddItem: Final LootStoreItem->itemid {}", LootStoreItem->itemid);
+        LOG_INFO("module.AutoBalance", "> OnBeforeDropAddItem: Final LootStoreItem->itemid {}", LootStoreItem->itemid);
 
     }
 };

@@ -24,8 +24,7 @@ class AutoBalance_PlayerScript : public PlayerScript
 
         virtual void OnLevelChanged(Player* player, uint8 oldlevel) override
         {
-            LOG_DEBUG(
-                "module.AutoBalance", "AutoBalance_PlayerScript::OnLevelChanged(): {} has leveled from {} to {}",
+            LOG_DEBUG("module.AutoBalance", "AutoBalance_PlayerScript::OnLevelChanged(): {} has leveled from {} to {}",
                 player->GetName(),
                 oldlevel,
                 player->getLevel()
@@ -69,8 +68,7 @@ class AutoBalance_PlayerScript : public PlayerScript
                 {
                     if (sAutoBalancer->RewardScalingMethod == AUTOBALANCE_SCALING_DYNAMIC)
                     {
-                        LOG_DEBUG(
-                            "module.AutoBalance",
+                        LOG_DEBUG("module.AutoBalance",
                             "AutoBalance_PlayerScript::OnGiveXP(): Distributing XP from '{}' to '{}' in dynamic mode - {}->{}",
                             victim->GetName(),
                             player->GetName(),
@@ -86,8 +84,7 @@ class AutoBalance_PlayerScript : public PlayerScript
                         auto maxPlayerCount = ((InstanceMap*)sMapMgr->FindMap(map->GetId(), map->GetInstanceId()))->GetMaxPlayers();
                         auto currentPlayerCount = map->GetPlayersCountExceptGMs();
                         
-                        LOG_DEBUG(
-                            "module.AutoBalance",
+                        LOG_DEBUG("module.AutoBalance",
                             "AutoBalance_PlayerScript::OnGiveXP(): Distributing XP from '{}' to '{}' in fixed mode - {}->{}",
                             victim->GetName(),
                             player->GetName(),
@@ -125,8 +122,7 @@ class AutoBalance_PlayerScript : public PlayerScript
                     // Dynamic Mode
                     if (sAutoBalancer->RewardScalingMethod == AUTOBALANCE_SCALING_DYNAMIC)
                     {
-                        LOG_DEBUG(
-                            "module.AutoBalance",
+                        LOG_DEBUG("module.AutoBalance",
                             "AutoBalance_PlayerScript::OnBeforeLootMoney(): Distributing money from '{}' in dynamic mode - {}->{}",
                             sourceCreature->GetName(),
                             loot->gold,
@@ -142,8 +138,7 @@ class AutoBalance_PlayerScript : public PlayerScript
                         auto maxPlayerCount = ((InstanceMap*)sMapMgr->FindMap(map->GetId(), map->GetInstanceId()))->GetMaxPlayers();
                         auto currentPlayerCount = map->GetPlayersCountExceptGMs();
                         
-                        LOG_DEBUG(
-                            "module.AutoBalance",
+                        LOG_DEBUG("module.AutoBalance",
                             "AutoBalance_PlayerScript::OnBeforeLootMoney(): Distributing money from '{}' in fixed mode - {}->{}",
                             sourceCreature->GetName(),
                             loot->gold,
@@ -159,8 +154,7 @@ class AutoBalance_PlayerScript : public PlayerScript
                     auto maxPlayerCount = ((InstanceMap*)sMapMgr->FindMap(map->GetId(), map->GetInstanceId()))->GetMaxPlayers();
                     auto currentPlayerCount = map->GetPlayersCountExceptGMs();
 
-                    LOG_DEBUG(
-                        "module.AutoBalance",
+                    LOG_DEBUG("module.AutoBalance",
                         "AutoBalance_PlayerScript::OnBeforeLootMoney(): Distributing money from a non-creature in fixed mode - {}->{}",
                         loot->gold,
                         uint32(loot->gold * ((float)currentPlayerCount / maxPlayerCount))

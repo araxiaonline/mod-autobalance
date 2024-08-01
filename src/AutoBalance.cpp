@@ -123,15 +123,15 @@ public:
             {
                 case GROUP_DIFFICULTY_MYTHIC:
                     defaultMultiplier *= sAutoBalancer->MythicMultiplier;
-                    LOG_INFO("server", "> OnAfterDefaultMultiplier: MythicMultiplier being applied {}", sAutoBalancer->MythicMultiplier);
+                    LOG_INFO("module.AutoBalance", "> OnAfterDefaultMultiplier: MythicMultiplier being applied {}", sAutoBalancer->MythicMultiplier);
                     break;
                 case GROUP_DIFFICULTY_LEGENDARY:
-                    LOG_INFO("server", "> OnAfterDefaultMultiplier: LegendaryMultiplier being applied {}", sAutoBalancer->LegendaryMultiplier);
+                    LOG_INFO("module.AutoBalance", "> OnAfterDefaultMultiplier: LegendaryMultiplier being applied {}", sAutoBalancer->LegendaryMultiplier);
                     defaultMultiplier *= sAutoBalancer->LegendaryMultiplier;
                     break;
                 case GROUP_DIFFICULTY_ASCENDANT:
                     defaultMultiplier *= sAutoBalancer->AscendantMultiplier;
-                    LOG_INFO("server", "> OnAfterDefaultMultiplier: AscendantMultiplier being applied {}", sAutoBalancer->AscendantMultiplier);
+                    LOG_INFO("module.AutoBalance", "> OnAfterDefaultMultiplier: AscendantMultiplier being applied {}", sAutoBalancer->AscendantMultiplier);
                     break;
                 default:
                     break;
@@ -153,16 +153,16 @@ public:
             {
                 case GROUP_DIFFICULTY_MYTHIC:
                     scaledHealth *= sAutoBalancer->MythicMultiplier;
-                    LOG_INFO("server", "> OnAfterDefaultMultiplier: MythicMultiplier being applied {}", sAutoBalancer->MythicMultiplier);
+                    LOG_INFO("module.AutoBalance", "> OnAfterDefaultMultiplier: MythicMultiplier being applied {}", sAutoBalancer->MythicMultiplier);
                     break;
                 case GROUP_DIFFICULTY_LEGENDARY:
                     scaledHealth *= sAutoBalancer->LegendaryMultiplier;
-                    LOG_INFO("server", "> OnAfterDefaultMultiplier: LegendaryMultiplier being applied {}", sAutoBalancer->LegendaryMultiplier);
+                    LOG_INFO("module.AutoBalance", "> OnAfterDefaultMultiplier: LegendaryMultiplier being applied {}", sAutoBalancer->LegendaryMultiplier);
 
                     break;
                 case GROUP_DIFFICULTY_ASCENDANT:
                     scaledHealth *= sAutoBalancer->AscendantMultiplier;
-                    LOG_INFO("server", "> OnAfterDefaultMultiplier: AscendantMultiplier being applied {}", sAutoBalancer->AscendantMultiplier);
+                    LOG_INFO("module.AutoBalance", "> OnAfterDefaultMultiplier: AscendantMultiplier being applied {}", sAutoBalancer->AscendantMultiplier);
                     break;
                 default:
                     break;
@@ -175,4 +175,5 @@ public:
 
 void AddAutoBalanceScripts()
 {
+    LOG_INFO("module.AutoBalance", "Initializig AutoBalance Scripts");
 }

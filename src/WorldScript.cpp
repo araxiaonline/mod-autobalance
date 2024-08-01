@@ -42,13 +42,13 @@ class AutoBalance_WorldScript : public WorldScript
 
         // Overrides
         if (sConfigMgr->GetOption<float>("AutoBalance.PerDungeonScaling", false, false))
-            LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.PerDungeonScaling` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
+            LOG_WARN("module.AutoBalance", "mod-autobalance: deprecated value `AutoBalance.PerDungeonScaling` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
             sAutoBalancer->dungeonOverrides = sAutoBalancer->LoadInflectionPointOverrides(
             sConfigMgr->GetOption<std::string>("AutoBalance.InflectionPoint.PerInstance",sConfigMgr->GetOption<std::string>("AutoBalance.PerDungeonScaling", "", false), false)
         ); // `AutoBalance.PerDungeonScaling` for backwards compatibility
 
         if (sConfigMgr->GetOption<float>("AutoBalance.PerDungeonBossScaling", false, false))
-            LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.PerDungeonBossScaling` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
+            LOG_WARN("module.AutoBalance", "mod-autobalance: deprecated value `AutoBalance.PerDungeonBossScaling` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
             sAutoBalancer->bossOverrides = sAutoBalancer->LoadInflectionPointOverrides(
             sConfigMgr->GetOption<std::string>("AutoBalance.InflectionPoint.Boss.PerInstance", sConfigMgr->GetOption<std::string>("AutoBalance.PerDungeonBossScaling", "", false), false)
         ); // `AutoBalance.PerDungeonBossScaling` for backwards compatibility
@@ -76,7 +76,7 @@ class AutoBalance_WorldScript : public WorldScript
         // AutoBalance.Enable.*
         // Deprecated setting warning
         if (sConfigMgr->GetOption<int>("AutoBalance.enable", -1, false) != -1)
-            LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.enable` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
+            LOG_WARN("module.AutoBalance", "mod-autobalance: deprecated value `AutoBalance.enable` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
 
         sAutoBalancer->EnableGlobal = sConfigMgr->GetOption<bool>("AutoBalance.Enable.Global", sConfigMgr->GetOption<bool>("AutoBalance.enable", 1, false)); // `AutoBalance.enable` for backwards compatibility
 
@@ -95,10 +95,10 @@ class AutoBalance_WorldScript : public WorldScript
 
         // Deprecated setting warning
         if (sConfigMgr->GetOption<int>("AutoBalance.DungeonsOnly", -1, false) != -1)
-            LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.DungeonsOnly` defined in `AutoBalance.conf`. This variable has been removed and has no effect. Please see `AutoBalance.conf.dist` for more details.");
+            LOG_WARN("module.AutoBalance", "mod-autobalance: deprecated value `AutoBalance.DungeonsOnly` defined in `AutoBalance.conf`. This variable has been removed and has no effect. Please see `AutoBalance.conf.dist` for more details.");
 
         if (sConfigMgr->GetOption<int>("AutoBalance.levelUseDbValuesWhenExists", -1, false) != -1)
-            LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.levelUseDbValuesWhenExists` defined in `AutoBalance.conf`. This variable has been removed and has no effect. Please see `AutoBalance.conf.dist` for more details.");
+            LOG_WARN("module.AutoBalance", "mod-autobalance: deprecated value `AutoBalance.levelUseDbValuesWhenExists` defined in `AutoBalance.conf`. This variable has been removed and has no effect. Please see `AutoBalance.conf.dist` for more details.");
 
         // Misc Settings
         // TODO: Organize and standardize variable names
@@ -114,7 +114,7 @@ class AutoBalance_WorldScript : public WorldScript
         // InflectionPoint*
         // warn the console if deprecated values are detected
         if (sConfigMgr->GetOption<float>("AutoBalance.BossInflectionMult", false, false))
-            LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.BossInflectionMult` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
+            LOG_WARN("module.AutoBalance", "mod-autobalance: deprecated value `AutoBalance.BossInflectionMult` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
 
         sAutoBalancer->InflectionPoint =                           sConfigMgr->GetOption<float>("AutoBalance.InflectionPoint", 0.5f, false);
         sAutoBalancer->InflectionPointCurveFloor =                 sConfigMgr->GetOption<float>("AutoBalance.InflectionPoint.CurveFloor", 0.0f, false);
@@ -174,21 +174,15 @@ class AutoBalance_WorldScript : public WorldScript
         // StatModifier*
         // warn the console if deprecated values are detected
         if (sConfigMgr->GetOption<float>("AutoBalance.rate.global", false, false))
-            LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.rate.global` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
+            LOG_WARN("module.AutoBalance", "mod-autobalance: deprecated value `AutoBalance.rate.global` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
         if (sConfigMgr->GetOption<float>("AutoBalance.rate.health", false, false))
-            LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.rate.health` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
+            LOG_WARN("module.AutoBalance", "mod-autobalance: deprecated value `AutoBalance.rate.health` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
         if (sConfigMgr->GetOption<float>("AutoBalance.rate.mana", false, false))
-            LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.rate.mana` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
+            LOG_WARN("module.AutoBalance", "mod-autobalance: deprecated value `AutoBalance.rate.mana` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
         if (sConfigMgr->GetOption<float>("AutoBalance.rate.armor", false, false))
-            LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.rate.armor` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
+            LOG_WARN("module.AutoBalance", "mod-autobalance: deprecated value `AutoBalance.rate.armor` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
         if (sConfigMgr->GetOption<float>("AutoBalance.rate.damage", false, false))
-            LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.rate.damage` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
-
-        // `AutoBalance.rate.global` for backwards compatibility
-        sAutoBalancer->StatsNormal[5] = AutoBalancerStatModifier();
-        // `AutoBalance.rate.global` for backwards compatibility
-        sAutoBalancer->StatsNormal[5].GlobalVal =
-            sConfigMgr->GetOption<float>("AutoBalance.StatModifier.Global", sConfigMgr->GetOption<float>("AutoBalance.rate.global", 1.0f, false), false);
+            LOG_WARN("module.AutoBalance", "mod-autobalance: deprecated value `AutoBalance.rate.damage` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
 
         // 5-player dungeons
         sAutoBalancer->StatModifier_Global =                       sConfigMgr->GetOption<float>("AutoBalance.StatModifier.Global", sConfigMgr->GetOption<float>("AutoBalance.rate.global", 1.0f, false), false); // `AutoBalance.rate.global` for backwards compatibility
@@ -383,15 +377,15 @@ class AutoBalance_WorldScript : public WorldScript
         }
         else
         {
-            LOG_ERROR("server.loading", "mod-autobalance: invalid value `{}` for `AutoBalance.LevelScaling.Method` defined in `AutoBalance.conf`. Defaulting to a value of `dynamic`.", LevelScalingMethodString);
+            LOG_ERROR("module.AutoBalance", "mod-autobalance: invalid value `{}` for `AutoBalance.LevelScaling.Method` defined in `AutoBalance.conf`. Defaulting to a value of `dynamic`.", LevelScalingMethodString);
             sAutoBalancer->LevelScalingMethod = AUTOBALANCE_SCALING_DYNAMIC;
         }
 
         if (sConfigMgr->GetOption<float>("AutoBalance.LevelHigherOffset", false, false))
-            LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.LevelHigherOffset` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
+            LOG_WARN("module.AutoBalance", "mod-autobalance: deprecated value `AutoBalance.LevelHigherOffset` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
         sAutoBalancer->LevelScalingSkipHigherLevels = sConfigMgr->GetOption<uint8>("AutoBalance.LevelScaling.SkipHigherLevels", sConfigMgr->GetOption<uint32>("AutoBalance.LevelHigherOffset", 3, false), true);
         if (sConfigMgr->GetOption<float>("AutoBalance.LevelLowerOffset", false, false))
-            LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.LevelLowerOffset` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
+            LOG_WARN("module.AutoBalance", "mod-autobalance: deprecated value `AutoBalance.LevelLowerOffset` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
         sAutoBalancer->LevelScalingSkipLowerLevels = sConfigMgr->GetOption<uint8>("AutoBalance.LevelScaling.SkipLowerLevels", sConfigMgr->GetOption<uint32>("AutoBalance.LevelLowerOffset", 5, false), true);
 
         sAutoBalancer->LevelScalingDynamicLevelCeilingDungeons = sConfigMgr->GetOption<uint8>("AutoBalance.LevelScaling.DynamicLevel.Ceiling.Dungeons", 1);
@@ -406,15 +400,15 @@ class AutoBalance_WorldScript : public WorldScript
 
 
         if (sConfigMgr->GetOption<float>("AutoBalance.LevelEndGameBoost", false, false))
-            LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.LevelEndGameBoost` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
+            LOG_WARN("module.AutoBalance", "mod-autobalance: deprecated value `AutoBalance.LevelEndGameBoost` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
         sAutoBalancer->LevelScalingEndGameBoost = sConfigMgr->GetOption<bool>("AutoBalance.LevelScaling.EndGameBoost", sConfigMgr->GetOption<bool>("AutoBalance.LevelEndGameBoost", 1, false), true);
 
         // RewardScaling.*
         // warn the console if deprecated values are detected
         if (sConfigMgr->GetOption<float>("AutoBalance.DungeonScaleDownXP", false, false))
-            LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.DungeonScaleDownXP` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
+            LOG_WARN("module.AutoBalance", "mod-autobalance: deprecated value `AutoBalance.DungeonScaleDownXP` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
         if (sConfigMgr->GetOption<float>("AutoBalance.DungeonScaleDownMoney", false, false))
-            LOG_WARN("server.loading", "mod-autobalance: deprecated value `AutoBalance.DungeonScaleDownMoney` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
+            LOG_WARN("module.AutoBalance", "mod-autobalance: deprecated value `AutoBalance.DungeonScaleDownMoney` defined in `AutoBalance.conf`. This variable will be removed in a future release. Please see `AutoBalance.conf.dist` for more details.");
 
         std::string RewardScalingMethodString = sConfigMgr->GetOption<std::string>("AutoBalance.RewardScaling.Method", "dynamic", false);
         if (RewardScalingMethodString == "fixed")
@@ -427,7 +421,7 @@ class AutoBalance_WorldScript : public WorldScript
         }
         else
         {
-            LOG_ERROR("server.loading", "mod-autobalance: invalid value `{}` for `AutoBalance.RewardScaling.Method` defined in `AutoBalance.conf`. Defaulting to a value of `dynamic`.", RewardScalingMethodString);
+            LOG_ERROR("module.AutoBalance", "mod-autobalance: invalid value `{}` for `AutoBalance.RewardScaling.Method` defined in `AutoBalance.conf`. Defaulting to a value of `dynamic`.", RewardScalingMethodString);
             sAutoBalancer->RewardScalingMethod = AUTOBALANCE_SCALING_DYNAMIC;
         }
 
