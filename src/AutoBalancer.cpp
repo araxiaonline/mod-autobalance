@@ -878,6 +878,8 @@ void AutoBalancer::LoadForcedCreatureIdsFromString(std::string creatureIds, int 
         int creatureId = atoi(delimitedValue.c_str());
         if (creatureId >= 0) {
             LOG_DEBUG("module.AutoBalance", "Inserting creatureId {} with forcedPlayerCount {}", creatureId, forcedPlayerCount);
+            forcedCreatureIds[creatureId] = forcedPlayerCount;
+        }
         {
             forcedCreatureIds[creatureId] = forcedPlayerCount;
         }
