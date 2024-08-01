@@ -33,7 +33,7 @@ class AutoBalancer
 private:
 
 public:
-    AutoBalancer(/* args */);
+    AutoBalancer();
     ~AutoBalancer();
 
     void LoadEnabledDungeons(std::string dungeonIdString);

@@ -82,6 +82,7 @@ AutoBalancer::AutoBalancer()
 {
     //ctor
     lastConfigTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    forcedCreatureIds.clear();
     LOG_INFO("AutoBalance", "[AutoBalance] Autobalance enabled!");
 }
 
@@ -875,7 +876,8 @@ void AutoBalancer::LoadForcedCreatureIdsFromString(std::string creatureIds, int 
     while (std::getline(creatureIdsStream, delimitedValue, ','))
     {
         int creatureId = atoi(delimitedValue.c_str());
-        if (creatureId >= 0)
+        if (creatureId >= 0) {
+            LOG_DEBUG("module.AutoBalance", "Inserting creatureId {} with forcedPlayerCount {}", creatureId, forcedPlayerCount);
         {
             forcedCreatureIds[creatureId] = forcedPlayerCount;
         }
