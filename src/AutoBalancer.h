@@ -175,7 +175,7 @@ public:
     // std::map<uint8, AutoBalancerStatModifier> StatsHeroicBoss;
 
     static AutoBalancer * getInstance() {
-        AutoBalancer instance;
+        static AutoBalancer instance;
         return &instance;
     }
 };
