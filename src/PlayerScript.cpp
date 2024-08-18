@@ -27,9 +27,9 @@ class AutoBalance_PlayerScript : public PlayerScript
             LOG_DEBUG("module.AutoBalance", "AutoBalance_PlayerScript::OnLevelChanged(): {} has leveled from {} to {}",
                 player->GetName(),
                 oldlevel,
-                player->getLevel()
+                player->GetLevel()
             );
-            
+
             if (!player || player->IsGameMaster())
                 return;
 
@@ -42,7 +42,7 @@ class AutoBalance_PlayerScript : public PlayerScript
             sAutoBalancer->UpdateMapPlayerStats(map);
 
             // schedule all creatures for an update
-            sAutoBalancer->lastConfigTime = 
+            sAutoBalancer->lastConfigTime =
                 std::chrono::duration_cast<std::chrono::microseconds>(
                     std::chrono::system_clock::now().time_since_epoch()
                 ).count();
@@ -83,7 +83,7 @@ class AutoBalance_PlayerScript : public PlayerScript
                         // Ensure that the players always get the same XP, even when entering the dungeon alone
                         auto maxPlayerCount = ((InstanceMap*)sMapMgr->FindMap(map->GetId(), map->GetInstanceId()))->GetMaxPlayers();
                         auto currentPlayerCount = map->GetPlayersCountExceptGMs();
-                        
+
                         LOG_DEBUG("module.AutoBalance",
                             "AutoBalance_PlayerScript::OnGiveXP(): Distributing XP from '{}' to '{}' in fixed mode - {}->{}",
                             victim->GetName(),
@@ -91,7 +91,7 @@ class AutoBalance_PlayerScript : public PlayerScript
                             amount,
                             uint32(amount * creatureABInfo->XPModifier * ((float)currentPlayerCount / maxPlayerCount))
                         );
-                        
+
                         amount = uint32(amount * creatureABInfo->XPModifier * ((float)currentPlayerCount / maxPlayerCount));
                     }
                 }
@@ -128,7 +128,7 @@ class AutoBalance_PlayerScript : public PlayerScript
                             loot->gold,
                             uint32(loot->gold * creatureABInfo->MoneyModifier)
                         );
-                        
+
                         loot->gold = uint32(loot->gold * creatureABInfo->MoneyModifier);
                     }
                     // Fixed Mode
@@ -137,14 +137,14 @@ class AutoBalance_PlayerScript : public PlayerScript
                         // Ensure that the players always get the same money, even when entering the dungeon alone
                         auto maxPlayerCount = ((InstanceMap*)sMapMgr->FindMap(map->GetId(), map->GetInstanceId()))->GetMaxPlayers();
                         auto currentPlayerCount = map->GetPlayersCountExceptGMs();
-                        
+
                         LOG_DEBUG("module.AutoBalance",
                             "AutoBalance_PlayerScript::OnBeforeLootMoney(): Distributing money from '{}' in fixed mode - {}->{}",
                             sourceCreature->GetName(),
                             loot->gold,
                             uint32(loot->gold * creatureABInfo->MoneyModifier * ((float)currentPlayerCount / maxPlayerCount))
                         );
-                        
+
                         loot->gold = uint32(loot->gold * creatureABInfo->MoneyModifier * ((float)currentPlayerCount / maxPlayerCount));
                     }
                 }

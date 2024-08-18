@@ -9,39 +9,39 @@
 #include "WorldSession.h"
 #include "Chat.h"
 #include "AutoBalancer.h"
+#include "Log.h"
 
 #if AC_COMPILER == AC_COMPILER_GNU
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
+using namespace Acore::ChatCommands;
+
 class AutoBalance_CommandScript : public CommandScript
 {
 public:
-    AutoBalance_CommandScript() : CommandScript("AutoBalance_CommandScript") {
-        LOG_DEBUG("module.AutoBalance", "Command Script Initializing");
-    }
+    AutoBalance_CommandScript() : CommandScript("AutoBalance_CommandScript") {}
 
-    std::vector<ChatCommand> GetCommands() const
+    ChatCommandTable GetCommands() const override
     {
-        static std::vector<ChatCommand> ABCommandTable =
-        {
-            { "setoffset",        SEC_GAMEMASTER,                        true, &HandleABSetOffsetCommand,                 "Sets the global Player Difficulty Offset for instances. Example: (You + offset(1) = 2 player difficulty)." },
-            { "getoffset",        SEC_PLAYER,                            true, &HandleABGetOffsetCommand,                 "Shows current global player offset value." },
-            { "checkmap",         SEC_GAMEMASTER,                        true, &HandleABCheckMapCommand,                  "Run a check for current map/instance, it can help in case you're testing autobalance with GM." },
-            { "mapstat",          SEC_PLAYER,                            true, &HandleABMapStatsCommand,                  "Shows current autobalance information for this map" },
-            { "creaturestat",     SEC_PLAYER,                            true, &HandleABCreatureStatsCommand,             "Shows current autobalance information for selected creature." },
-            { "mythic",           SEC_PLAYER,                            true, &HandleABMythicCommand,                    "Sets the group difficulty to Mythic" },
-            { "legendary",        SEC_PLAYER,                            true, &HandleABLegendaryCommand,                 "Sets the group difficulty to Legendary" },
-            { "ascendant",        SEC_PLAYER,                            true, &HandleABAscendantCommand,                 "Sets the group difficulty to Ascendant" },
-            { "getdifficulty",    SEC_PLAYER,                            true, &HandleABGetDifficultyCommand,             "Shows the current group difficulty" },
-
+        static ChatCommandTable ABCommandTable = {
+            { "setoffset", HandleABSetOffsetCommand, SEC_GAMEMASTER, Console::No }, // "Sets the global Player Difficulty Offset for instances. Example: (You + offset(1) = 2 player difficulty)."
+            { "getoffset", HandleABGetOffsetCommand, SEC_PLAYER, Console::No }, // "Shows current global player offset value."
+            { "checkmap",  HandleABCheckMapCommand, SEC_GAMEMASTER, Console::No }, // "Run a check for current map/instance, it can help in case you're testing autobalance with GM."
+            { "mapstat",   HandleABMapStatsCommand, SEC_PLAYER, Console::No }, // "Shows current autobalance information for this map."
+            { "creaturestat", HandleABCreatureStatsCommand, SEC_PLAYER, Console::No }, // "Shows current autobalance information for selected creature."
+            { "mythic",    HandleABMythicCommand, SEC_PLAYER, Console::No }, // "Sets the group difficulty to Mythic."
+            { "legendary", HandleABLegendaryCommand, SEC_PLAYER, Console::No }, // "Sets the group difficulty to Legendary."
+            { "ascendant", HandleABAscendantCommand, SEC_PLAYER, Console::No }, // "Sets the group difficulty to Ascendant."
+            { "getdifficulty", HandleABGetDifficultyCommand, SEC_PLAYER, Console::No }, // "Shows the current group difficulty."
         };
 
-        static std::vector<ChatCommand> commandTable =
+        static ChatCommandTable commandTable =
         {
-            { "module.AutoBalance",     SEC_PLAYER,                             false, NULL,                      "", ABCommandTable },
-            { "ab",              SEC_PLAYER,                             false, NULL,                      "", ABCommandTable },
+            { "module.AutoBalance", ABCommandTable },
+            { "ab", ABCommandTable },
         };
+
         return commandTable;
     }
 
@@ -98,8 +98,8 @@ public:
             {
                 if (Player* playerHandle = playerIteration->GetSource())
                 {
-                    if (playerHandle->getLevel() > level)
-                        mapABInfo->mapLevel = level = playerHandle->getLevel();
+                    if (playerHandle->GetLevel() > level)
+                        mapABInfo->mapLevel = level = playerHandle->GetLevel();
                 }
             }
         }
@@ -202,7 +202,7 @@ public:
         return true;
     }
 
-    static bool HandleABGetDifficultyCommand(ChatHandler* handler, const char*) {
+    static bool HandleABGetDifficultyCommand(ChatHandler* handler, const char* /*args*/) {
         Player* player = handler->GetPlayer();
         Group* group = player->GetGroup();
         if (!group)

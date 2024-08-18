@@ -431,7 +431,7 @@ void AutoBalancer::AddCreatureToMapData(Creature* creature, bool addToCreatureLi
                 LOG_DEBUG("module.AutoBalance", "AutoBalance_AllCreature::AddCreatureToMapData(): Summoned creature {} ({}) does not have a summoner.", creature->GetName(), creatureABInfo->UnmodifiedLevel);
             }
 
-            // if this is a summon, we shouldn't track it in any list and it does not 
+            // if this is a summon, we shouldn't track it in any list and it does not
             // contribute to the average level
             LOG_DEBUG("module.AutoBalance", "AutoBalance_AllCreature::AddCreatureToMapData(): Summoned creature {} ({}) will not affect the map's stats.", creature->GetName(), creatureABInfo->UnmodifiedLevel);
             return;
@@ -459,7 +459,7 @@ void AutoBalancer::AddCreatureToMapData(Creature* creature, bool addToCreatureLi
         return;
     }
 
-    // if the creature level is below 85% of the minimum LFG level, 
+    // if the creature level is below 85% of the minimum LFG level,
     // assume it's a flavor creature and shouldn't be tracked or modified
     if (creatureABInfo->UnmodifiedLevel < ((float)mapABInfo->lfgMinLevel * .85f))
     {
@@ -472,7 +472,7 @@ void AutoBalancer::AddCreatureToMapData(Creature* creature, bool addToCreatureLi
         return;
     }
 
-    // if the creature level is above 125% of the maximum LFG level, 
+    // if the creature level is above 125% of the maximum LFG level,
     // assume it's a flavor creature or holiday boss and shouldn't be tracked or modified
     if (creatureABInfo->UnmodifiedLevel > ((float)mapABInfo->lfgMaxLevel * 1.15f))
     {
@@ -668,7 +668,7 @@ void AutoBalancer::AddCreatureToMapData(Creature* creature, bool addToCreatureLi
 void AutoBalancer::RemoveCreatureFromMapData(Creature* creature)
 {
     // get map data
-    AutoBalanceMapInfo *mapABInfo = 
+    AutoBalanceMapInfo *mapABInfo =
         creature->GetMap()->CustomData.GetDefault<AutoBalanceMapInfo>("AutoBalanceMapInfo");
 
     // if the creature is in the all creature list, remove it
@@ -691,7 +691,7 @@ void AutoBalancer::RemoveCreatureFromMapData(Creature* creature)
                 mapABInfo->allMapCreatures.erase(creatureIteration);
 
                 // mark this creature as removed
-                AutoBalanceCreatureInfo *creatureABInfo = 
+                AutoBalanceCreatureInfo *creatureABInfo =
                     creature->CustomData.GetDefault<AutoBalanceCreatureInfo>("AutoBalanceCreatureInfo");
                 creatureABInfo->isInCreatureList = false;
                 break;
@@ -777,11 +777,11 @@ void AutoBalancer::UpdateMapPlayerStats(Map* map)
             Player* playerHandle = playerIteration->GetSource();
             if (playerHandle && !playerHandle->IsGameMaster())
             {
-                if (playerHandle->getLevel() > highestPlayerLevel || highestPlayerLevel == 0)
-                    highestPlayerLevel = playerHandle->getLevel();
+                if (playerHandle->GetLevel() > highestPlayerLevel || highestPlayerLevel == 0)
+                    highestPlayerLevel = playerHandle->GetLevel();
 
-                if (playerHandle->getLevel() < lowestPlayerLevel || lowestPlayerLevel == 0)
-                    lowestPlayerLevel = playerHandle->getLevel();
+                if (playerHandle->GetLevel() < lowestPlayerLevel || lowestPlayerLevel == 0)
+                    lowestPlayerLevel = playerHandle->GetLevel();
             }
             mapABInfo->highestPlayerLevel = highestPlayerLevel;
             mapABInfo->lowestPlayerLevel = lowestPlayerLevel;
@@ -799,9 +799,9 @@ void AutoBalancer::UpdateMapPlayerStats(Map* map)
     mapABInfo->playerCount = map->GetPlayersCountExceptGMs();
 }
 
-// Used for reading the string from the configuration file to for those creatures 
+// Used for reading the string from the configuration file to for those creatures
 // who need to be scaled for XX number of players.
-void AutoBalancer::LoadForcedCreatureIdsFromString(std::string creatureIds, int forcedPlayerCount) 
+void AutoBalancer::LoadForcedCreatureIdsFromString(std::string creatureIds, int forcedPlayerCount)
 {
     std::string delimitedValue;
     std::stringstream creatureIdsStream;

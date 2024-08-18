@@ -44,7 +44,7 @@ public:
 
         for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
         {
-            if (!itr->GetSource() || itr->GetSource()->IsGameMaster() || itr->GetSource()->getLevel() < DEFAULT_MAX_LEVEL)
+            if (!itr->GetSource() || itr->GetSource()->IsGameMaster() || itr->GetSource()->GetLevel() < DEFAULT_MAX_LEVEL)
                 continue;
 
             itr->GetSource()->AddItem(reward, 1 + difficulty); // difficulty boost
@@ -78,7 +78,7 @@ public:
 
         // 1. Is the instance scaled up to max level or beyond?
         AutoBalanceMapInfo *mapABInfo = map->CustomData.GetDefault<AutoBalanceMapInfo>("AutoBalanceMapInfo");
-        if (!mapABInfo || !mapABInfo->isLevelScalingEnabled || player->getLevel() < 80)
+        if (!mapABInfo || !mapABInfo->isLevelScalingEnabled || player->GetLevel() < 80)
         {
             return;
         }
